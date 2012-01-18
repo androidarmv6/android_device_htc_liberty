@@ -23,7 +23,8 @@ DEVICE_PACKAGE_OVERLAYS := device/htc/liberty/overlay
 PRODUCT_COPY_FILES += \
     device/htc/liberty/key/liberty-keypad.kl:system/usr/keylayout/liberty-keypad.kl \
     device/htc/liberty/key/liberty-keypad.kcm.bin:system/usr/keychars/liberty-keypad.kcm.bin \
-    device/htc/liberty/key/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl
+    device/htc/liberty/key/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl \
+    device/htc/liberty/key/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/init.liberty.rc:root/init.liberty.rc
@@ -74,7 +75,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.media.dec.vid.wmv.enabled=1 \
     dalvik.vm.dexopt-flags=m=y \
     net.bt.name=Android \
-    ro.config.sync=yes
+    ro.config.sync=yes \
+    ro.config.disable_hw_accel=true
+## Re-enable hw accel if I ever get it working ##
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -88,8 +91,15 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
     frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
+    frameworks/base/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
+    frameworks/base/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
+    frameworks/base/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
     frameworks/base/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
     frameworks/base/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml
+
+# Add the Device Calibration File for the synaptics touchscreen
+PRODUCT_COPY_FILES += \
+device/htc/liberty/prebuilt/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc
 
 # media config xml file
 PRODUCT_COPY_FILES += \
@@ -102,8 +112,14 @@ PRODUCT_PACKAGES += \
     libOmxCore \
     copybit.msm7k \
     sensors.liberty \
-    gps.liberty \
     com.android.future.usb.accessory
+#Want gps, but it won't build ATM \
+#    gps.liberty \
+
+#Copy prebuilt (and working) audio files until I can get them built myself
+PRODUCT_COPY_FILES += \
+    device/htc/liberty/prebuilt/audio.primary.liberty.so:system/lib/hw/audio.primary.liberty.so \
+    device/htc/liberty/prebuilt/audio_policy.liberty.so:system/lib/hw/audio_policy.liberty.so
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -134,7 +150,7 @@ $(call inherit-product, device/htc/liberty/media_a1026.mk)
 # stuff common to all HTC phones
 $(call inherit-product, device/htc/common/common.mk)
 
-$(call inherit-product, build/target/product/full_base.mk)
+$(call inherit-product, build/target/product/full_base_telephony.mk)
 
 
 PRODUCT_NAME := generic_liberty

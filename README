@@ -1,6 +1,6 @@
 Device configuration for the HTC Liberty (aka HTC Aria/Gratia)
 
-Copyright (C) 2011 The CyanogenMod Project
+Copyright (C) 2012 The CyanogenMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@ Copyright (C) 2011 The CyanogenMod Project
 
 * Description
 
-  This repository is for CM7 on HTC liberty.
+  This repository is for CM9 on HTC liberty.
   It is still a work in progress.
 
 
-* How To Build CM7 for HTC liberty
+* How To Build CM9 for HTC liberty
 
   Make a workspace
 
@@ -30,20 +30,44 @@ Copyright (C) 2011 The CyanogenMod Project
 
   Do repo init & sync
 
-  $ repo init -u git://github.com/CyanogenMod/android.git -b gingerbread
+  $ repo init -u git://github.com/CyanogenMod/android.git -b ics
   $ repo sync -j20
 
   Setup vendor
 
-  $ cd vendor/cyanogen/
-  $ ./get-rommanager
+  $ cd vendor/cm/
+  $ ./get-prebuilts
+
+
+  Apply fixes to browser and webrtc (may be changed later)
+
+  Open frameworks/base/core/java/android/webkit/BrowserFrame.java with a text editor
+  Add "loader.executeLoad();" at line 872
+  It should look something like this:
+
+869:  loader.setCacheMode(headers.containsKey("If-Modified-Since")
+870:                || headers.containsKey("If-None-Match") ? 
+871:                        WebSettings.LOAD_NO_CACHE : cacheMode);
+872:        // Load the page 
+873:        loader.executeLoad(); 
+874:        // Set referrer to current URL?
+875:        return !synchronous ? loadListener : null;
+
+  Then download this patch: http://www.mediafire.com/?zwjk16t73x29vdv
+  And extract it to external/webrtc
 
 
   Setup device
 
+  $ cd device
+  $ mkdir htc
+  $ cd htc
+  $ git clone git://github.com/WinSuk/android_device_htc_liberty.git liberty
+  $ git clone git://github.com/CyanogenMod/android_device_htc_common.git common
+
   Connect phone to usb abd make sure debugging is avaliable for adb pulls
 
-  $ cd ../../device/htc/liberty/
+  $ cd liberty
   $ ./extract-files.sh # this pulls files from working liberty with most variants of shipped HTC ROM
   $ cd ../../..
 
@@ -52,15 +76,12 @@ Copyright (C) 2011 The CyanogenMod Project
 
   $ source build/envsetup.sh
   $ lunch
-  (select cyanogen_liberty-eng)
+  (select cm_liberty-userdebug)
 
 
-  Build CM7
+  Build CM9
 
-  $ make acp
-  (to avoid errors on distributed building)
-
-  $ make -j4 bacon
+  $ make otapackage -j4
 
 
 * Thanks

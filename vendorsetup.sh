@@ -22,3 +22,4 @@
 
 add_lunch_combo generic_liberty-userdebug
 add_lunch_combo generic_liberty-eng
+add_lunch_combo cm_liberty-userdebug

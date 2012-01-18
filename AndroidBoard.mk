@@ -28,6 +28,6 @@ include $(CLEAR_VARS)
 -include vendor/htc/liberty/AndroidBoardVendor.mk
 
 file := $(TARGET_RECOVERY_ROOT_OUT)/sbin/postrecoveryboot.sh
-ALL_PREBUILT += $(file)
+PRODUCT_COPY_FILES $(file):/sbin/postrecovery.sh
 $(file) : $(LOCAL_PATH)/postrecoveryboot.sh | $(ACP)
 	$(transform-prebuilt-to-target)
