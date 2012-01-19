@@ -24,7 +24,14 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/key/liberty-keypad.kl:system/usr/keylayout/liberty-keypad.kl \
     device/htc/liberty/key/liberty-keypad.kcm.bin:system/usr/keychars/liberty-keypad.kcm.bin \
     device/htc/liberty/key/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl \
-    device/htc/liberty/key/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl
+    device/htc/liberty/key/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl \
+    device/htc/liberty/key/atmel-touchscreen.kl:system/usr/keylayout/atmel-touchscreen.kl
+
+# Input device calibration files
+PRODUCT_COPY_FILES += \
+    device/htc/liberty/prebuilt/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
+    device/htc/liberty/prebuilt/atmel-touchscreen.idc:system/usr/idc/atmel-touchscreen.idc \
+    device/htc/liberty/prebuilt/curcial-oj.idc:system/usr/idc/curcial-oj.idc
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/init.liberty.rc:root/init.liberty.rc
@@ -97,10 +104,6 @@ PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
     frameworks/base/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml
 
-# Add the Device Calibration File for the synaptics touchscreen
-PRODUCT_COPY_FILES += \
-device/htc/liberty/prebuilt/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc
-
 # media config xml file
 PRODUCT_COPY_FILES += \
     device/htc/liberty/media_profiles.xml:system/etc/media_profiles.xml
@@ -109,17 +112,16 @@ PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
     gralloc.msm7k \
-    libOmxCore \
     copybit.msm7k \
     sensors.liberty \
+    audio.primary.liberty \
+    audio_policy.liberty \
+    audio.a2dp.default \
+    libstagefrighthw \
+    libmm-omxcore \
+    libOmxCore \
+    libOmxVidEnc \
     com.android.future.usb.accessory
-#Want gps, but it won't build ATM \
-#    gps.liberty \
-
-#Copy prebuilt (and working) audio files until I can get them built myself
-PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/audio.primary.liberty.so:system/lib/hw/audio.primary.liberty.so \
-    device/htc/liberty/prebuilt/audio_policy.liberty.so:system/lib/hw/audio_policy.liberty.so
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
