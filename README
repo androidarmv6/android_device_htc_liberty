@@ -59,17 +59,28 @@ Copyright (C) 2012 The CyanogenMod Project
 
   Setup device
 
-  $ cd device
+  $ cd ../../device
   $ mkdir htc
   $ cd htc
   $ git clone git://github.com/WinSuk/android_device_htc_liberty.git liberty
   $ git clone git://github.com/CyanogenMod/android_device_htc_common.git common
+
 
   Connect phone to usb abd make sure debugging is avaliable for adb pulls
 
   $ cd liberty
   $ ./extract-files.sh # this pulls files from working liberty with most variants of shipped HTC ROM
   $ cd ../../..
+
+
+  Copy bootanimation.zip from device/htc/liberty/prebuilt to vendor/cm/prebuilt/common
+
+  $ cp device/htc/liberty/prebuilt/bootanimation.zip vendor/cm/prebuilt/common/bootanimation.zip
+
+
+  If you want all the ringtones and notifications:
+
+  Uncomment AudioPackage5.mk in frameworks/base/data/sounds/AllAudio.mk
 
 
   Setup environment

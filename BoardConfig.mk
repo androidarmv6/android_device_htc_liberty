@@ -53,7 +53,7 @@ BOARD_WLAN_DEVICE           := bcm4329
 WIFI_DRIVER_MODULE_PATH     := "/system/lib/modules/bcm4329.ko"
 WIFI_DRIVER_FW_STA_PATH     := "/system/etc/firmware/fw_bcm4329.bin"
 WIFI_DRIVER_FW_AP_PATH      := "/system/etc/firmware/fw_bcm4329_apsta.bin"
-WIFI_DRIVER_MODULE_ARG      := "firmware_path=/system/etc/firmware/fw_bcm4329.bin nvram_path=/proc/calibration"
+WIFI_DRIVER_MODULE_ARG      := "iface_name=wlan0 firmware_path=/system/etc/firmware/fw_bcm4329.bin nvram_path=/proc/calibration"
 WIFI_DRIVER_MODULE_NAME     := "bcm4329"
 
 BOARD_USES_GENERIC_AUDIO := false
@@ -109,3 +109,14 @@ LOCAL_KERNEL := device/htc/liberty/prebuilt/kernel
 #BOARD_USES_RECOVERY_CHARGEMODE := true
 TARGET_RECOVERY_INITRC := device/htc/liberty/init.recovery.rc
 BOARD_HAS_NO_SELECT_BUTTON := true
+
+## TEST ZONE ##
+BOARD_USE_USB_MASS_STORAGE_SWITCH := true
+BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
+TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/usb_mass_storage/lun0/file
+COMMON_GLOBAL_CFLAGS += -DREFRESH_RATE=60 -DMISSING_EGL_EXTERNAL_IMAGE -DMISSING_EGL_PIXEL_FORMAT_YV12 -DMISSING_GRALLOC_BUFFERS
+#USE_OPENGL_RENDERER := true
+#BOARD_USES_QCOM_HARDWARE := true
+#BOARD_USE_QCOM_PMEM := true
+BOARD_OVERLAY_FORMAT_YCbCr_420_SP := true
+BOARD_HAVE_GPS := true

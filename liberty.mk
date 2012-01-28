@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009 The Android Open Source Project
+# Copyright (C) 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/curcial-oj.idc:system/usr/idc/curcial-oj.idc
 
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/init.liberty.rc:root/init.liberty.rc
+    device/htc/liberty/init.liberty.rc:root/init.liberty.rc \
+    device/htc/liberty/init.liberty.usb.rc:root/init.liberty.usb.rc \
+    device/htc/liberty/ueventd.rc:root/ueventd.rc
 
 PRODUCT_PROPERTY_OVERRIDES += \
     rild.libpath=/system/lib/libhtc_ril.so \
@@ -46,7 +48,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.ril.hsxpa=2 \
     ro.ril.gprsclass=12 \
     mobiledata.interfaces=rmnet0,rmnet1,rmnet2,gprs,ppp0 \
-    wifi.interface = eth0 \
+    wifi.interface = wlan0 \
     wifi.supplicant_scan_interval=15 \
     ro.sf.lcd_density = 160 \
     ro.opengles.version=131072
@@ -83,8 +85,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.dexopt-flags=m=y \
     net.bt.name=Android \
     ro.config.sync=yes \
-    ro.config.disable_hw_accel=true
-## Re-enable hw accel if I ever get it working ##
+    persist.sys.usb.config=mass_storage,adb \
+    ro.telephony.ril.v3=signalstrength \
+    dalvik.vm.dexopt-data-only=1
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -117,16 +120,25 @@ PRODUCT_PACKAGES += \
     audio.primary.liberty \
     audio_policy.liberty \
     audio.a2dp.default \
-    libstagefrighthw \
+    gps.liberty \
+    overlay.default \
+    liboverlay \
     libmm-omxcore \
     libOmxCore \
-    libOmxVidEnc \
-    com.android.future.usb.accessory
+    libOmxVenc \
+    libOmxVdec \
+    libstagefrighthw \
+    libaudioutils \
+    hwcomposer.default \
+    hwcomposer.msm7k \
+    com.android.future.usb.accessory \
+    e2fsck
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
-    vendor/cyanogen/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml
+    vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
+    device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd
 
 # Kernel modules
 
@@ -153,7 +165,6 @@ $(call inherit-product, device/htc/liberty/media_a1026.mk)
 $(call inherit-product, device/htc/common/common.mk)
 
 $(call inherit-product, build/target/product/full_base_telephony.mk)
-
 
 PRODUCT_NAME := generic_liberty
 PRODUCT_DEVICE := liberty

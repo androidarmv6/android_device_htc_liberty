@@ -1,3 +1,5 @@
+import init.liberty.usb.rc
+
 on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
 
@@ -24,6 +26,18 @@ on boot
     chown system system /sys/class/leds/lcd-backlight/brightness
     chown system system /sys/class/leds/lcd-backlight/auto
 
+on early-init
+    export EXTERNAL_STORAGE /mnt/sdcard
+    export SD_EXT_DIRECTORY /sd-ext
+
+# create mountpoints
+    mkdir /mnt/sdcard 0000 system system
+    mkdir /sd-ext 0771 system system
+
+# Backwards Compat - XXX: Going away in G*
+    symlink /mnt/sdcard /sdcard
+
+    /system/etc/init.d/05mountsd
 
 on init
     mount rootfs rootfs / remount
@@ -72,22 +86,22 @@ on init
    write /sys/block/mtdblock5/bdi/read_ahead_kb 4
 
 service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
-    -Dwext -ieth0 -c/data/misc/wifi/wpa_supplicant.conf -q
+    -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
 #   we will start as root and wpa_supplicant will switch to user wifi
 #   after setting up the capabilities required for WEXT
 #   user wifi
 #   group wifi inet keystore
     class main
-    socket wpa_eth0 dgram 660 wifi wifi
+    socket wpa_wlan0 dgram 660 wifi wifi
     disabled
     oneshot
 
-service dhcpcd_eth0 /system/bin/dhcpcd -ABKL
+service dhcpcd_wlan0 /system/bin/dhcpcd -ABKL
     class main
     disabled
     oneshot
 
-service iprenew_eth0 /system/bin/dhcpcd -n
+service iprenew_wlan0 /system/bin/dhcpcd -n
     class main
     disabled
     oneshot
@@ -124,9 +138,32 @@ service hciattach /system/bin/brcm_patchram_plus --enable_hci --enable_lpm \
     group bluetooth net_bt_admin
     disabled
 
-on early-init
-    # setup sdcard and mount
-    export EXTERNAL_STORAGE /mnt/sdcard
-    mkdir /mnt/sdcard 0000 system system
-    # for backwards compatibility
-    symlink /mnt/sdcard /sdcard
+service hfag /system/bin/sdptool add --channel=10 HFAG
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
+
+service hsag /system/bin/sdptool add --channel=11 HSAG
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
+
+service opush /system/bin/sdptool add --channel=12 OPUSH
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
+
+service pbap /system/bin/sdptool add --channel=19 PBAP
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
+
+service map /system/bin/sdptool add --channel=16 MAS
+    user bluetooth
+    group bluetooth net_bt_admin
+    disabled
+    oneshot
