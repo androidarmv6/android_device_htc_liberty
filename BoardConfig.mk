@@ -110,10 +110,13 @@ LOCAL_KERNEL := device/htc/liberty/prebuilt/kernel
 TARGET_RECOVERY_INITRC := device/htc/liberty/init.recovery.rc
 BOARD_HAS_NO_SELECT_BUTTON := true
 
-## TEST ZONE ##
 BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/usb_mass_storage/lun0/file
+
+BOARD_USE_LEGACY_TRACKPAD := true
+
+## TEST ZONE ##
 COMMON_GLOBAL_CFLAGS += -DREFRESH_RATE=60 -DMISSING_EGL_EXTERNAL_IMAGE -DMISSING_EGL_PIXEL_FORMAT_YV12 -DMISSING_GRALLOC_BUFFERS
 #USE_OPENGL_RENDERER := true
 #BOARD_USES_QCOM_HARDWARE := true
