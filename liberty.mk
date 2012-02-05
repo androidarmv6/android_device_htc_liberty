@@ -36,7 +36,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/htc/liberty/init.liberty.rc:root/init.liberty.rc \
     device/htc/liberty/init.liberty.usb.rc:root/init.liberty.usb.rc \
-    device/htc/liberty/ueventd.rc:root/ueventd.rc
+    device/htc/liberty/ueventd.liberty.rc:root/ueventd.liberty.rc
 
 PRODUCT_PROPERTY_OVERRIDES += \
     rild.libpath=/system/lib/libhtc_ril.so \
