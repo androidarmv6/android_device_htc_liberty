@@ -39,21 +39,9 @@ Copyright (C) 2012 The CyanogenMod Project
   $ ./get-prebuilts
 
 
-  Apply fixes to browser and webrtc (may be changed later)
+  Apply fixes to webrtc (may be changed later)
 
-  Open frameworks/base/core/java/android/webkit/BrowserFrame.java with a text editor
-  Add "loader.executeLoad();" at line 872
-  It should look something like this:
-
-869:  loader.setCacheMode(headers.containsKey("If-Modified-Since")
-870:                || headers.containsKey("If-None-Match") ? 
-871:                        WebSettings.LOAD_NO_CACHE : cacheMode);
-872:        // Load the page 
-873:        loader.executeLoad(); 
-874:        // Set referrer to current URL?
-875:        return !synchronous ? loadListener : null;
-
-  Then download this patch: http://www.mediafire.com/?zwjk16t73x29vdv
+  Download this patch: http://www.mediafire.com/?zwjk16t73x29vdv
   And extract it to external/webrtc
 
 
