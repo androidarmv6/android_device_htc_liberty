@@ -48,10 +48,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.ril.hsxpa=2 \
     ro.ril.gprsclass=12 \
     mobiledata.interfaces=rmnet0,rmnet1,rmnet2,gprs,ppp0 \
-    wifi.interface = wlan0 \
+    wifi.interface=wlan0 \
     wifi.supplicant_scan_interval=15 \
-    ro.sf.lcd_density = 160 \
-    ro.opengles.version=131072
+    ro.sf.lcd_density=160 \
+    ro.opengles.version=131072 \
+    ro.telephony.ril.v3=signalstrength \
+    ro.cdma.voicemail.number=mine
 
 # Default network type.
 # 0 => WCDMA preferred.
@@ -76,18 +78,18 @@ $(call inherit-product-if-exists, vendor/htc/liberty/liberty-vendor.mk)
 PRODUCT_PROPERTY_OVERRIDES += \
     settings.display.autobacklight=1 \
     settings.display.brightness=143 \
-    persist.service.mount.playsnd = 0 \
-    ro.com.google.locationfeatures = 1 \
+    persist.service.mount.playsnd=0 \
+    ro.com.google.locationfeatures=1 \
     ro.setupwizard.mode=OPTIONAL \
     ro.setupwizard.enable_bypass=1 \
     ro.media.dec.aud.wma.enabled=1 \
     ro.media.dec.vid.wmv.enabled=1 \
     dalvik.vm.dexopt-flags=m=y \
-    net.bt.name=Android \
+    net.bt.name=Liberty \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
-    ro.telephony.ril.v3=signalstrength \
-    dalvik.vm.dexopt-data-only=1
+    dalvik.vm.dexopt-data-only=1 \
+    debug.sf.hw=1
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -114,8 +116,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
-    gralloc.msm7k \
-    copybit.msm7k \
+    gralloc.msm7x27 \
+    copybit.msm7x27 \
     sensors.liberty \
     audio.primary.liberty \
     audio_policy.liberty \
@@ -127,10 +129,9 @@ PRODUCT_PACKAGES += \
     libOmxCore \
     libOmxVenc \
     libOmxVdec \
-    libstagefrighthw \
     libaudioutils \
     hwcomposer.default \
-    hwcomposer.msm7k \
+    hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck
 
@@ -138,7 +139,8 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
-    device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd
+    device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd \
+    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit
 
 # Kernel modules
 
@@ -156,7 +158,9 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/bcm4329.ko:system/lib/modules/bcm4329.ko \
     device/htc/liberty/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
+    device/htc/liberty/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin \
+    device/htc/liberty/prebuilt/libaudio.so:obj/lib/libaudio.so \
+    device/htc/liberty/prebuilt/libaudiopolicy.so:obj/lib/libaudiopolicy.so
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)

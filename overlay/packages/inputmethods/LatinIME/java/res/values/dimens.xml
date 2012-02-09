@@ -18,5 +18,6 @@
 */
 -->
 <resources>
+    <integer name="max_more_suggestions_row">4</integer>
     <dimen name="key_preview_backing_height">160dip</dimen>
 </resources>
