@@ -131,7 +131,6 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libaudioutils \
     hwcomposer.default \
-    hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck
 

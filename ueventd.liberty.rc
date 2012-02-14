@@ -2,10 +2,13 @@
 /dev/ttyHS0             0600 bluetooth bluetooth
 
 #graphics
-/dev/kgsl               0666 system    graphics
-/dev/pmem 		0666 system    graphics
-/dev/graphics/fb0       0666 system    graphics
+/dev/kgsl               0666   system    graphics
+/dev/pmem 		0666   system    graphics
+/dev/graphics/fb0       0666   system    graphics
 
 # audio devices
-/dev/cpu_dma_latency	0660 system    system
-/dev/msm_aac            0660 system    audio
+/dev/cpu_dma_latency	0660   system    system
+/dev/msm_aac            0660   system    audio
+
+# for camera, in the future
+/dev/msm_camera/*       0660   system    camera
