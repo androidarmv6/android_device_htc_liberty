@@ -89,8 +89,6 @@ service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
 #   user wifi
 #   group wifi inet keystore
     class main
-    user root
-    group wifi inet
     socket wpa_wlan0 dgram 660 wifi wifi
     disabled
     oneshot

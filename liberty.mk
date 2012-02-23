@@ -89,7 +89,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
     dalvik.vm.dexopt-data-only=1 \
-    debug.sf.hw=1
+    debug.sf.hw=1 \
+    ro.config.disable_hw_accel=true
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -139,7 +140,11 @@ PRODUCT_COPY_FILES += \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd \
-    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit
+    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit \
+    device/htc/liberty/prebuilt/libaudio.so:obj/lib/libaudio.so \
+    device/htc/liberty/prebuilt/libaudiopolicy.so:obj/lib/libaudiopolicy.so \
+    device/htc/liberty/prebuilt/bootanimation.zip:system/media/bootanimation.zip
+    # This doesn't want to override the boot animation in vendor_cm, but I'll put it here anyway..
 
 # Kernel modules
 
@@ -157,9 +162,7 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/bcm4329.ko:system/lib/modules/bcm4329.ko \
     device/htc/liberty/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin \
-    device/htc/liberty/prebuilt/libaudio.so:obj/lib/libaudio.so \
-    device/htc/liberty/prebuilt/libaudiopolicy.so:obj/lib/libaudiopolicy.so
+    device/htc/liberty/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)
