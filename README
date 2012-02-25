@@ -39,12 +39,6 @@ Copyright (C) 2012 The CyanogenMod Project
   $ ./get-prebuilts
 
 
-  Apply fixes to webrtc (may be changed later)
-
-  Download this patch: http://www.mediafire.com/?zwjk16t73x29vdv
-  And extract it to external/webrtc
-
-
   Setup device
 
   $ cd ../../device
@@ -59,6 +53,11 @@ Copyright (C) 2012 The CyanogenMod Project
   $ cd liberty
   $ ./extract-files.sh # this pulls files from working liberty with most variants of shipped HTC ROM
   $ cd ../../..
+
+
+  Apply webrtc patch
+
+  $ patch -p1 -i ../../device/htc/liberty/external_webrtc.patch -d external/webrtc
 
 
   Copy bootanimation.zip from device/htc/liberty/prebuilt to vendor/cm/prebuilt/common
