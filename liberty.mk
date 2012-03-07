@@ -141,8 +141,6 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd \
     device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit \
-    device/htc/liberty/prebuilt/libaudio.so:obj/lib/libaudio.so \
-    device/htc/liberty/prebuilt/libaudiopolicy.so:obj/lib/libaudiopolicy.so \
     device/htc/liberty/prebuilt/bootanimation.zip:system/media/bootanimation.zip
     # This doesn't want to override the boot animation in vendor_cm, but I'll put it here anyway..
 
