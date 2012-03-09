@@ -23,7 +23,7 @@
 # WARNING: This line must come *before* including the proprietary
 # variant, so that it gets overwritten by the parent (which goes
 # against the traditional rules of inheritance).
-USE_CAMERA_STUB := false
+USE_CAMERA_STUB := true
 BOARD_USE_FROYO_LIBCAMERA := true
 JS_ENGINE:=v8
 
@@ -35,7 +35,7 @@ TARGET_SPECIFIC_HEADER_PATH := device/htc/liberty/include
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-TARGET_BOARD_PLATFORM := msm7x27
+TARGET_BOARD_PLATFORM := msm7k
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv6-vfp
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
@@ -47,7 +47,7 @@ TARGET_BOOTLOADER_BOARD_NAME := liberty
 
 TARGET_PROVIDES_INIT_TARGET_RC := true
 
-#TARGET_LIBAGL_USE_GRALLOC_COPYBITS := true
+TARGET_LIBAGL_USE_GRALLOC_COPYBITS := true
 
 # Wifi related defines
 BOARD_WPA_SUPPLICANT_DRIVER := WEXT
@@ -80,7 +80,7 @@ BOARD_EGL_CFG := device/htc/liberty/egl.cfg
 
 BOARD_USE_NEW_LIBRIL_HTC := true
 
-#BOARD_NO_RGBX_8888 := true
+BOARD_NO_RGBX_8888 := true
 
 BOARD_USES_QCOM_GPS := true
 BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
@@ -115,14 +115,13 @@ BOARD_USE_USB_MASS_STORAGE_SWITCH := true
 BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/usb_mass_storage/lun0/file
 
+# Fix for Atmel touchscreens; trackball button
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 BOARD_USE_LEGACY_TRACKPAD := true
 
-#### TEST ZONE ####
-
 HTTP := chrome
 
-#TARGET_FORCE_CPU_UPLOAD := true
+#### TEST ZONE ####
 
 BOARD_USES_OVERLAY := true
 COMMON_GLOBAL_CFLAGS += -DREFRESH_RATE=60 -DMISSING_EGL_EXTERNAL_IMAGE -DMISSING_EGL_PIXEL_FORMAT_YV12 -DMISSING_GRALLOC_BUFFERS -DUNABLE_TO_DEQUEUE
@@ -130,8 +129,7 @@ COMMON_GLOBAL_CFLAGS += -DREFRESH_RATE=60 -DMISSING_EGL_EXTERNAL_IMAGE -DMISSING
 BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
 
-#BOARD_USES_AUDIO_LEGACY := true
-
-#Might need this later
+# Camera testing
 #BOARD_CAMERA_USE_GETBUFFERINFO := true
 #BOARD_USE_CAF_LIBCAMERA := true
+TARGET_LEGACY_CAMERA := true

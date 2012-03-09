@@ -88,9 +88,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     net.bt.name=Liberty \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
-    dalvik.vm.dexopt-data-only=1 \
-    debug.sf.hw=1 \
-    ro.config.disable_hw_accel=true
+    dalvik.vm.dexopt-data-only=1
+#    ro.config.disable_hw_accel=true
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -117,8 +116,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
-    gralloc.msm7x27 \
-    copybit.msm7x27 \
+    gralloc.msm7k \
+    copybit.msm7k \
     sensors.liberty \
     audio.primary.liberty \
     audio_policy.liberty \
@@ -132,17 +131,22 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libaudioutils \
     hwcomposer.default \
+    hwcomposer.msm7k \
     com.android.future.usb.accessory \
-    e2fsck
+    e2fsck \
+    libstagefrighthw \
+    libmemalloc \
+    liboverlay \
+    libQcomUI \
+    libtilerenderer \
+    camera.msm7k
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd \
-    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit \
-    device/htc/liberty/prebuilt/bootanimation.zip:system/media/bootanimation.zip
-    # This doesn't want to override the boot animation in vendor_cm, but I'll put it here anyway..
+    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit
 
 # Kernel modules
 
