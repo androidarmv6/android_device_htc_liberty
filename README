@@ -60,11 +60,6 @@ Copyright (C) 2012 The CyanogenMod Project
   $ patch -p1 -i ../../device/htc/liberty/external_webrtc.patch -d external/webrtc
 
 
-  Copy bootanimation.zip from device/htc/liberty/prebuilt to vendor/cm/prebuilt/common
-
-  $ cp device/htc/liberty/prebuilt/bootanimation.zip vendor/cm/prebuilt/common/bootanimation.zip
-
-
   If you want all the ringtones and notifications:
 
   Uncomment AudioPackage5.mk in frameworks/base/data/sounds/AllAudio.mk

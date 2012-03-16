@@ -17,5 +17,5 @@ PRODUCT_BRAND := htc
 PRODUCT_MODEL := Liberty
 PRODUCT_MANUFACTURER := HTC
 
-# This doesn't want to override the boot animation in vendor_cm, but I'll put it here anyway..
-PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/bootanimation.zip:system/media/bootanimation.zip
+# Liberty uses vertical 320x480 boot animation
+TARGET_BOOTANIMATION_NAME := vertical-320x480
