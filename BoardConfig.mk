@@ -23,7 +23,7 @@
 # WARNING: This line must come *before* including the proprietary
 # variant, so that it gets overwritten by the parent (which goes
 # against the traditional rules of inheritance).
-USE_CAMERA_STUB := true
+USE_CAMERA_STUB := false
 BOARD_USE_FROYO_LIBCAMERA := true
 JS_ENGINE:=v8
 
@@ -35,7 +35,7 @@ TARGET_SPECIFIC_HEADER_PATH := device/htc/liberty/include
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-TARGET_BOARD_PLATFORM := msm7k
+TARGET_BOARD_PLATFORM := msm7x27
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv6-vfp
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
@@ -74,9 +74,9 @@ BOARD_VENDOR_QCOM_AMSS_VERSION := 4735
 
 BOARD_VENDOR_USE_AKMD := akm8973
 
-BOARD_EGL_CFG := device/htc/liberty/egl.cfg
+BOARD_EGL_CFG := device/htc/liberty/prebuilt/lib/egl/egl.cfg
 
-#BOARD_USE_NASTY_PTHREAD_CREATE_HACK := true
+BOARD_USE_NASTY_PTHREAD_CREATE_HACK := true
 
 BOARD_USE_NEW_LIBRIL_HTC := true
 

@@ -21,17 +21,17 @@ DEVICE_PACKAGE_OVERLAYS := device/htc/liberty/overlay
 
 # Keylayouts
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/key/liberty-keypad.kl:system/usr/keylayout/liberty-keypad.kl \
-    device/htc/liberty/key/liberty-keypad.kcm.bin:system/usr/keychars/liberty-keypad.kcm.bin \
-    device/htc/liberty/key/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl \
-    device/htc/liberty/key/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl \
-    device/htc/liberty/key/atmel-touchscreen.kl:system/usr/keylayout/atmel-touchscreen.kl
+    device/htc/liberty/prebuilt/usr/keylayout/liberty-keypad.kl:system/usr/keylayout/liberty-keypad.kl \
+    device/htc/liberty/prebuilt/usr/keychars/liberty-keypad.kcm.bin:system/usr/keychars/liberty-keypad.kcm.bin \
+    device/htc/liberty/prebuilt/usr/keylayout/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl \
+    device/htc/liberty/prebuilt/usr/keylayout/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl \
+    device/htc/liberty/prebuilt/usr/keylayout/atmel-touchscreen.kl:system/usr/keylayout/atmel-touchscreen.kl
 
 # Input device calibration files
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
-    device/htc/liberty/prebuilt/atmel-touchscreen.idc:system/usr/idc/atmel-touchscreen.idc \
-    device/htc/liberty/prebuilt/curcial-oj.idc:system/usr/idc/curcial-oj.idc
+    device/htc/liberty/prebuilt/usr/idc/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
+    device/htc/liberty/prebuilt/usr/idc/atmel-touchscreen.idc:system/usr/idc/atmel-touchscreen.idc \
+    device/htc/liberty/prebuilt/usr/idc/curcial-oj.idc:system/usr/idc/curcial-oj.idc
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/init.liberty.rc:root/init.liberty.rc \
@@ -52,8 +52,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     wifi.supplicant_scan_interval=15 \
     ro.sf.lcd_density=160 \
     ro.opengles.version=131072 \
-    ro.telephony.ril.v3=signalstrength \
-    ro.cdma.voicemail.number=mine
+    ro.telephony.ril.v3=signalstrength
 
 # Default network type.
 # 0 => WCDMA preferred.
@@ -116,8 +115,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
-    gralloc.msm7k \
-    copybit.msm7k \
+    gralloc.msm7x27 \
+    copybit.msm7x27 \
     sensors.liberty \
     audio.primary.liberty \
     audio_policy.liberty \
@@ -131,7 +130,7 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libaudioutils \
     hwcomposer.default \
-    hwcomposer.msm7k \
+    hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck \
     libstagefrighthw \
@@ -139,14 +138,14 @@ PRODUCT_PACKAGES += \
     liboverlay \
     libQcomUI \
     libtilerenderer \
-    camera.msm7k
+    camera.msm7x27
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
-    device/htc/liberty/prebuilt/05mountsd:system/etc/init.d/05mountsd \
-    device/htc/liberty/prebuilt/20userinit:system/etc/init.d/20userinit
+    device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
+    device/htc/liberty/prebuilt/etc/init.d/20userinit:system/etc/init.d/20userinit
 
 # Kernel modules
 
@@ -161,10 +160,10 @@ PRODUCT_COPY_FILES += \
 
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/bcm4329.ko:system/lib/modules/bcm4329.ko \
-    device/htc/liberty/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
-    device/htc/liberty/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
+    device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko \
+    device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
+    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
+    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)
