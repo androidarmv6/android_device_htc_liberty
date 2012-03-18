@@ -115,8 +115,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
-    gralloc.msm7x27 \
-    copybit.msm7x27 \
+    gralloc.msm7k \
+    copybit.msm7k \
     sensors.liberty \
     audio.primary.liberty \
     audio_policy.liberty \
@@ -130,7 +130,7 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libaudioutils \
     hwcomposer.default \
-    hwcomposer.msm7x27 \
+    hwcomposer.msm7k \
     com.android.future.usb.accessory \
     e2fsck \
     libstagefrighthw \
@@ -138,7 +138,7 @@ PRODUCT_PACKAGES += \
     liboverlay \
     libQcomUI \
     libtilerenderer \
-    camera.msm7x27
+    camera.msm7k
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
