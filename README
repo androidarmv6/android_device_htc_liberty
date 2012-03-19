@@ -45,7 +45,6 @@ Copyright (C) 2012 The CyanogenMod Project
   $ mkdir htc
   $ cd htc
   $ git clone git://github.com/WinSuk/android_device_htc_liberty.git liberty
-  $ git clone git://github.com/CyanogenMod/android_device_htc_common.git common
 
 
   Connect phone to usb abd make sure debugging is avaliable for adb pulls

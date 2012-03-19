@@ -168,10 +168,11 @@ PRODUCT_COPY_FILES += \
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)
 
-# stuff common to all HTC phones
-$(call inherit-product, device/htc/common/common.mk)
+# Sets copy files for all HTC-specific device
+PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:system/etc/ecclist_for_mcc.conf
 
 $(call inherit-product, build/target/product/full_base_telephony.mk)
 
 PRODUCT_NAME := generic_liberty
+PRODUCT_MANUFACTURER := HTC
 PRODUCT_DEVICE := liberty
