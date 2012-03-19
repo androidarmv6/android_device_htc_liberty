@@ -30,7 +30,7 @@ Copyright (C) 2012 The CyanogenMod Project
 
   Do repo init & sync
 
-  $ repo init -u git://github.com/CyanogenMod/android.git -b ics
+  $ repo init -u git://github.com/WinSuk/android.git -b ics
   $ repo sync -j20
 
   Setup vendor
@@ -41,27 +41,11 @@ Copyright (C) 2012 The CyanogenMod Project
 
   Setup device
 
-  $ cd ../../device
-  $ mkdir htc
-  $ cd htc
-  $ git clone git://github.com/WinSuk/android_device_htc_liberty.git liberty
-
-
   Connect phone to usb abd make sure debugging is avaliable for adb pulls
 
-  $ cd liberty
+  $ cd ../../device/liberty
   $ ./extract-files.sh # this pulls files from working liberty with most variants of shipped HTC ROM
   $ cd ../../..
-
-
-  Apply webrtc patch
-
-  $ patch -p1 -i ../../device/htc/liberty/external_webrtc.patch -d external/webrtc
-
-
-  If you want all the ringtones and notifications:
-
-  Uncomment AudioPackage5.mk in frameworks/base/data/sounds/AllAudio.mk
 
 
   Setup environment
