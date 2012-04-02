@@ -115,8 +115,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     lights.liberty \
-    gralloc.msm7k \
-    copybit.msm7k \
+    gralloc.msm7x27 \
+    copybit.msm7x27 \
     sensors.liberty \
     audio.primary.liberty \
     audio_policy.liberty \
@@ -130,15 +130,14 @@ PRODUCT_PACKAGES += \
     libOmxVdec \
     libaudioutils \
     hwcomposer.default \
-    hwcomposer.msm7k \
+    hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck \
-    libstagefrighthw \
     libmemalloc \
     liboverlay \
     libQcomUI \
     libtilerenderer \
-    camera.msm7k
+    camera.msm7x27
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -160,10 +159,31 @@ PRODUCT_COPY_FILES += \
 
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
+    device/htc/liberty/prebuilt/lib/libC2D2.so:system/lib/libC2D2.so \
+    device/htc/liberty/prebuilt/lib/libgsl.so:system/lib/libgsl.so \
+    device/htc/liberty/prebuilt/lib/libOpenVG.so:system/lib/libOpenVG.so \
+    device/htc/liberty/prebuilt/lib/libsc-a2xx.so:system/lib/libsc-a2xx.so \
+    device/htc/liberty/prebuilt/lib/egl/eglsubAndroid.so:system/lib/egl/eglsubAndroid.so \
+    device/htc/liberty/prebuilt/lib/egl/libEGL_adreno200.so:system/lib/egl/libEGL_adreno200.so \
+    device/htc/liberty/prebuilt/lib/egl/libGLES_android.so:system/lib/egl/libGLES_android.so \
+    device/htc/liberty/prebuilt/lib/egl/libGLESv1_CM_adreno200.so:system/lib/egl/libGLESv1_CM_adreno200.so \
+    device/htc/liberty/prebuilt/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so \
+    device/htc/liberty/prebuilt/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so \
     device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko \
+    device/htc/liberty/prebuilt/lib/modules/tun.ko:system/lib/modules/tun.ko \
+    device/htc/liberty/prebuilt/lib/modules/gan-eth.ko:system/lib/modules/gan-eth.ko \
+    device/htc/liberty/prebuilt/etc/firmware/a225p5_pm4.fw:system/etc/firmware/a225p5_pm4.fw \
+    device/htc/liberty/prebuilt/etc/firmware/a225_pfp.fw:system/etc/firmware/a225_pfp.fw \
+    device/htc/liberty/prebuilt/etc/firmware/a225_pm4.fw:system/etc/firmware/a225_pm4.fw \
+    device/htc/liberty/prebuilt/etc/firmware/a300_pfp.fw:system/etc/firmware/a300_pfp.fw \
+    device/htc/liberty/prebuilt/etc/firmware/a300_pm4.fw:system/etc/firmware/a300_pm4.fw \
     device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
+    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin \
+    device/htc/liberty/prebuilt/etc/firmware/leia_pfp_470.fw:system/etc/firmware/leia_pfp_470.fw \
+    device/htc/liberty/prebuilt/etc/firmware/leia_pm4_470.fw:system/etc/firmware/leia_pm4_470.fw \
+    device/htc/liberty/prebuilt/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
+    device/htc/liberty/prebuilt/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)

@@ -38,17 +38,11 @@ cp $STAGESYS/etc/AudioPara4.csv ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/etc/AudioPara4_WB.csv ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/etc/AudioPreProcess.csv ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/etc/WPDB.zip ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/etc/firmware/yamato_pfp.fw ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/etc/firmware/yamato_pm4.fw ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/lib/egl/libEGL_adreno200.so ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/lib/egl/libGLESv1_CM_adreno200.so ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/lib/egl/libGLESv2_adreno200.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libmm-adspsvc.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libOmxH264Dec.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libOmxMpeg4Dec.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libcamera.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libOmxVidEnc.so ../../../vendor/htc/$DEVICE/proprietary
-cp $STAGESYS/lib/libgsl.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libhtc_acoustic.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libaudioeq.so ../../../vendor/htc/$DEVICE/proprietary
 cp $STAGESYS/lib/libhtc_ril.so ../../../vendor/htc/$DEVICE/proprietary
@@ -85,17 +79,11 @@ PRODUCT_COPY_FILES += \\
     vendor/htc/__DEVICE__/proprietary/AudioPara4_WB.csv:/system/etc/AudioPara4_WB.csv \\
     vendor/htc/__DEVICE__/proprietary/AudioPreProcess.csv:/system/etc/AudioPreProcess.csv \\
     vendor/htc/__DEVICE__/proprietary/WPDB.zip:/system/etc/WPDB.zip \\
-    vendor/htc/__DEVICE__/proprietary/yamato_pfp.fw:/system/etc/firmware/yamato_pfp.fw \\
-    vendor/htc/__DEVICE__/proprietary/yamato_pm4.fw:/system/etc/firmware/yamato_pm4.fw \\
-    vendor/htc/__DEVICE__/proprietary/libEGL_adreno200.so:/system/lib/egl/libEGL_adreno200.so \\
-    vendor/htc/__DEVICE__/proprietary/libGLESv1_CM_adreno200.so:/system/lib/egl/libGLESv1_CM_adreno200.so \\
-    vendor/htc/__DEVICE__/proprietary/libGLESv2_adreno200.so:/system/lib/egl/libGLESv2_adreno200.so \\
     vendor/htc/__DEVICE__/proprietary/libmm-adspsvc.so:/system/lib/libmm-adspsvc.so \\
     vendor/htc/__DEVICE__/proprietary/libOmxH264Dec.so:/system/lib/libOmxH264Dec.so \\
     vendor/htc/__DEVICE__/proprietary/libOmxMpeg4Dec.so:/system/lib/libOmxMpeg4Dec.so \\
     vendor/htc/__DEVICE__/proprietary/libOmxVidEnc.so:/system/lib/libOmxVidEnc.so \\
     vendor/htc/__DEVICE__/proprietary/libcamera.so:/system/lib/libcamera.so \\
-    vendor/htc/__DEVICE__/proprietary/libgsl.so:/system/lib/libgsl.so \\
     vendor/htc/__DEVICE__/proprietary/libhtc_acoustic.so:/system/lib/libhtc_acoustic.so \\
     vendor/htc/__DEVICE__/proprietary/libaudioeq.so:/system/lib/libaudioeq.so \\
     vendor/htc/__DEVICE__/proprietary/libhtc_ril.so:/system/lib/libhtc_ril.so \\
