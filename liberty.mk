@@ -88,7 +88,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
     dalvik.vm.dexopt-data-only=1
-#    ro.config.disable_hw_accel=true
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -122,21 +121,12 @@ PRODUCT_PACKAGES += \
     audio_policy.liberty \
     audio.a2dp.default \
     gps.liberty \
-    overlay.default \
-    liboverlay \
     libmm-omxcore \
     libOmxCore \
-    libOmxVenc \
-    libOmxVdec \
-    libaudioutils \
     hwcomposer.default \
     hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck \
-    libmemalloc \
-    liboverlay \
-    libQcomUI \
-    libtilerenderer \
     camera.msm7x27
 
 PRODUCT_COPY_FILES += \
