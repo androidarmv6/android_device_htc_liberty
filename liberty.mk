@@ -119,21 +119,22 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += \
     librs_jni \
-    lights.liberty \
-    gralloc.msm7x27 \
-    copybit.msm7x27 \
-    sensors.liberty \
-    audio.primary.liberty \
-    audio_policy.liberty \
+    lights.msm7k \
+    gralloc.msm7k \
+    copybit.msm7k \
+    sensors.msm7k \
+    audio.primary.msm7k \
+    audio_policy.msm7k \
     audio.a2dp.default \
     gps.liberty \
     libmm-omxcore \
     libOmxCore \
     hwcomposer.default \
-    hwcomposer.msm7x27 \
+    hwcomposer.msm7k \
     com.android.future.usb.accessory \
     e2fsck \
-    camera.msm7x27
+    camera.msm7k \
+    libgps
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -179,7 +180,8 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/etc/firmware/leia_pfp_470.fw:system/etc/firmware/leia_pfp_470.fw \
     device/htc/liberty/prebuilt/etc/firmware/leia_pm4_470.fw:system/etc/firmware/leia_pm4_470.fw \
     device/htc/liberty/prebuilt/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
-    device/htc/liberty/prebuilt/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw
+    device/htc/liberty/prebuilt/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
+    vendor/cm/prebuilt/common/bootanimation/vertical-320x480.zip:system/media/bootanimation.zip
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)
@@ -192,3 +194,4 @@ $(call inherit-product, build/target/product/full_base_telephony.mk)
 PRODUCT_NAME := generic_liberty
 PRODUCT_MANUFACTURER := HTC
 PRODUCT_DEVICE := liberty
+
