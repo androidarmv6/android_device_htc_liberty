@@ -87,7 +87,13 @@ PRODUCT_PROPERTY_OVERRIDES += \
     net.bt.name=Liberty \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
-    dalvik.vm.dexopt-data-only=1
+    dalvik.vm.dexopt-data-only=1 \
+    debug.sf.hw=1 \
+    debug.composition.type=dyn \
+    ro.sf.compbypass.enable=1 \
+    dev.pm.dyn_samplingrate=1 \
+    com.qc.hardware=true \
+    com.qc.hdmi_out=false
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
