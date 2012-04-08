@@ -141,14 +141,14 @@ BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
 
 # I not tested it! After test I will confirm if it is right config
-BOARD_USES_ADRENO_200 := true
-TARGET_USES_SF_BYPASS := false
-TARGET_HAVE_BYPASS := false
+#BOARD_USES_ADRENO_200 := true
+#TARGET_USES_SF_BYPASS := false
+#TARGET_HAVE_BYPASS := false
 #TARGET_QCOM_HDMI_OUT := true wtf hdmi?
-TARGET_GRALLOC_USES_ASHMEM := false
-TARGET_USES_GENLOCK := true
-TARGET_FORCE_CPU_UPLOAD := true
-BOARD_USE_QCOM_PMEM := true
+#TARGET_GRALLOC_USES_ASHMEM := false
+#TARGET_USES_GENLOCK := true
+#TARGET_FORCE_CPU_UPLOAD := true
+#BOARD_USE_QCOM_PMEM := true
 
 #this is wor kgsl-2d0, we need to port missing kgsl-2d0 to get it working
 #so I disabled it now until we port kernel kgsl-2d0 module
