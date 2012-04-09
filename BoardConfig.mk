@@ -35,10 +35,7 @@ TARGET_SPECIFIC_HEADER_PATH := device/htc/liberty/include
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-#right config is msm7k because propretiary camera libs don't have msm7x27
-#and don't working with msm7x27!!!
-TARGET_BOARD_PLATFORM := msm7k
-
+TARGET_BOARD_PLATFORM := msm7x27
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv6-vfp
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
@@ -85,13 +82,9 @@ BOARD_USE_NEW_LIBRIL_HTC := true
 
 BOARD_NO_RGBX_8888 := true
 
-#disable qcom gps, enable new liberty libgps bassed on github.com/tytung hd2 gps + use default cm gpsshim
-BOARD_USES_GPSSHIM := true
-BOARD_GPS_LIBRARIES := libgps
-#BOARD_USES_QCOM_GPS := true
-#BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
-#BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 20000
-
+BOARD_USES_QCOM_GPS := true
+BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
+BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 20000
 BOARD_USES_QCOM_LIBRPC := true
 
 # # cat /proc/mtd (liberty)
@@ -133,26 +126,20 @@ TARGET_USES_OVERLAY := true
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DREFRESH_RATE=60
 #BOARD_USE_QCOM_PMEM := true
 #TARGET_GRALLOC_USES_ASHMEM := true
-
-#this config when enabled cause wrong things in menus, so I disabled it now
-#USE_OPENGL_RENDERER := true
-
+#BOARD_USES_GPSSHIM := true
+USE_OPENGL_RENDERER := true
 BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
 
-# I not tested it! After test I will confirm if it is right config
 BOARD_USES_ADRENO_200 := true
+TARGET_USES_C2D_COMPOSITION := false
 TARGET_USES_SF_BYPASS := false
 TARGET_HAVE_BYPASS := false
-#TARGET_QCOM_HDMI_OUT := true wtf hdmi?
+TARGET_QCOM_HDMI_OUT := true
 TARGET_GRALLOC_USES_ASHMEM := false
 TARGET_USES_GENLOCK := true
 TARGET_FORCE_CPU_UPLOAD := true
 BOARD_USE_QCOM_PMEM := true
-
-#this is wor kgsl-2d0, we need to port missing kgsl-2d0 to get it working
-#so I disabled it now until we port kernel kgsl-2d0 module
-#TARGET_USES_C2D_COMPOSITION := true
 
 # Camera testing
 #BOARD_CAMERA_USE_GETBUFFERINFO := true
