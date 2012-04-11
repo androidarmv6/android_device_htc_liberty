@@ -173,11 +173,6 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/egl/libGLESv1_CM_adreno200.so:system/lib/egl/libGLESv1_CM_adreno200.so \
     device/htc/liberty/prebuilt/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so \
     device/htc/liberty/prebuilt/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so \
-    device/htc/liberty/prebuilt/etc/firmware/a225p5_pm4.fw:system/etc/firmware/a225p5_pm4.fw \
-    device/htc/liberty/prebuilt/etc/firmware/a225_pfp.fw:system/etc/firmware/a225_pfp.fw \
-    device/htc/liberty/prebuilt/etc/firmware/a225_pm4.fw:system/etc/firmware/a225_pm4.fw \
-    device/htc/liberty/prebuilt/etc/firmware/a300_pfp.fw:system/etc/firmware/a300_pfp.fw \
-    device/htc/liberty/prebuilt/etc/firmware/a300_pm4.fw:system/etc/firmware/a300_pm4.fw \
     device/htc/liberty/prebuilt/etc/firmware/leia_pfp_470.fw:system/etc/firmware/leia_pfp_470.fw \
     device/htc/liberty/prebuilt/etc/firmware/leia_pm4_470.fw:system/etc/firmware/leia_pm4_470.fw \
     device/htc/liberty/prebuilt/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
