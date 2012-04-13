@@ -89,9 +89,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mass_storage,adb \
     dalvik.vm.dexopt-data-only=1 \
     debug.sf.hw=1 \
-    debug.composition.type=dyn \
-    ro.sf.compbypass.enable=1 \
-    dev.pm.dyn_samplingrate=1 \
+    debug.qctwa.statusbar=1 \
+    debug.qctwa.preservebuf=1 \
     com.qc.hardware=true \
     com.qc.hdmi_out=false
 
