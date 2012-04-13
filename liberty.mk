@@ -154,7 +154,6 @@ PRODUCT_COPY_FILES += \
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko \
-    device/htc/liberty/prebuilt/lib/modules/tun.ko:system/lib/modules/tun.ko \
     device/htc/liberty/prebuilt/lib/modules/gan-eth.ko:system/lib/modules/gan-eth.ko \
     device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
