@@ -51,8 +51,9 @@ TARGET_LIBAGL_USE_GRALLOC_COPYBITS := true
 
 # Wifi related defines
 BOARD_WPA_SUPPLICANT_DRIVER := WEXT
-WPA_SUPPLICANT_VERSION      := VER_0_6_X
+WPA_SUPPLICANT_VERSION      := VER_0_8_X
 BOARD_WLAN_DEVICE           := bcm4329
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_wext
 WIFI_DRIVER_MODULE_PATH     := "/system/lib/modules/bcm4329.ko"
 WIFI_DRIVER_FW_PATH_STA     := "/system/etc/firmware/fw_bcm4329.bin"
 WIFI_DRIVER_FW_PATH_AP      := "/system/etc/firmware/fw_bcm4329_apsta.bin"
