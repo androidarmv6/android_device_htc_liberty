@@ -132,7 +132,7 @@ PRODUCT_PACKAGES += \
     hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck \
-    camera.msm7x27
+    camera.liberty
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -181,6 +181,10 @@ $(call inherit-product, device/htc/liberty/media_a1026.mk)
 
 # Sets copy files for all HTC-specific device
 PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:system/etc/ecclist_for_mcc.conf
+
+# Prebuilt libraries that are needed to build open-source libraries
+PRODUCT_COPY_FILES += \
+    device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
 
 $(call inherit-product, build/target/product/full_base_telephony.mk)
 
