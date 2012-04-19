@@ -158,7 +158,7 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/modules/gan-eth.ko:system/lib/modules/gan-eth.ko \
     device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin \
+    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
 
 # ICS GPU drivers from Qualcomm
 PRODUCT_COPY_FILES += \
