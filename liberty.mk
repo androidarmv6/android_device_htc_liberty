@@ -141,21 +141,8 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
 
-# Kernel modules
-
-ifeq ($(TARGET_PREBUILT_KERNEL),)
-LOCAL_KERNEL := device/htc/liberty/prebuilt/kernel
-else
-LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
-endif
-
-PRODUCT_COPY_FILES += \
-    $(LOCAL_KERNEL):kernel
-
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko \
-    device/htc/liberty/prebuilt/lib/modules/gan-eth.ko:system/lib/modules/gan-eth.ko \
     device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
     device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
     device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin

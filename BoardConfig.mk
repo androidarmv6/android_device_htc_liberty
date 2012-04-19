@@ -96,16 +96,24 @@ BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 20000
 # mtd3: 0f000000 00020000 "system"
 # mtd4: 02800000 00020000 "cache"
 # mtd5: 0b920000 00020000 "userdata"
-BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002c0000
-BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00420000
+
+# For some reason the kernel is bigger now, and the old size limits are too small
+# It still flashes the bigger image perfectly fine, despite make saying it's too big
+# Raise the limit (for now) so it will build
+BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00340000
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00500000
+#BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002c0000
+#BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00420000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 0x0f000000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x0b920000
 
 BOARD_FLASH_BLOCK_SIZE := 131072
 
 TARGET_RELEASETOOLS_EXTENSIONS := device/htc/common
+
+TARGET_KERNEL_SOURCE := kernel/htc/msm7227
+TARGET_KERNEL_CONFIG := cyanogen_msm7227_defconfig
 TARGET_PREBUILT_KERNEL := device/htc/liberty/prebuilt/kernel
-LOCAL_KERNEL := device/htc/liberty/prebuilt/kernel
 
 #TARGET_PREBUILT_RECOVERY_KERNEL := device/htc/liberty/prebuilt/recovery_kernel
 #BOARD_USES_RECOVERY_CHARGEMODE := true
@@ -127,11 +135,6 @@ BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
 TARGET_USES_GENLOCK := true
 
-#### TEST ZONE ####
-
 # Camera testing
-#BOARD_CAMERA_USE_GETBUFFERINFO := true
-#BOARD_USE_CAF_LIBCAMERA := true
-#TARGET_LEGACY_CAMERA := true
 BOARD_USES_HTC_CAMERA := true
 COMMON_GLOBAL_CFLAGS += -DBINDER_COMPAT
