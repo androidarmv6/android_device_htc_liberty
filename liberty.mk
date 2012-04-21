@@ -141,11 +141,13 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
 
+ifneq ($(FULL_KERNEL_BUILD),true)
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd \
-    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329.bin:system/etc/firmware/fw_bcm4329.bin \
-    device/htc/liberty/prebuilt/etc/firmware/fw_bcm4329_apsta.bin:system/etc/firmware/fw_bcm4329_apsta.bin
+    device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko \
+    device/htc/liberty/prebuilt/vendor/firmware/fw_bcm4329.bin:system/vendor/firmware/fw_bcm4329.bin \
+    device/htc/liberty/prebuilt/vendor/firmware/fw_bcm4329_apsta.bin:system/vendor/firmware/fw_bcm4329_apsta.bin
+endif
 
 # ICS GPU drivers from Qualcomm
 PRODUCT_COPY_FILES += \
