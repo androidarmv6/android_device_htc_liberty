@@ -86,7 +86,7 @@ BOARD_NO_RGBX_8888 := true
 BOARD_USES_QCOM_GPS := true
 BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
 BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 20000
-#BOARD_USES_QCOM_LIBRPC := true
+BOARD_USES_QCOM_LIBRPC := true
 
 # # cat /proc/mtd (liberty)
 # dev:    size   erasesize  name
