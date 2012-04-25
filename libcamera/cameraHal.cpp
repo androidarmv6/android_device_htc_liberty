@@ -1,5 +1,9 @@
 /*
- * Copyright (C) 2012, Raviprasad V Mummidi.
+ * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2012 Raviprasad V Mummidi.
+ * Copyright (C) 2012 Zhibin Wu, Simon Davie, Nico Kaiser
+ * Copyright (C) 2012 QiSS ME Project Team
+ * Copyright (C) 2012 Twisted, Sean Neeley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +20,40 @@
 
 #define LOG_TAG "CameraHAL"
 
-#include <CameraHardwareInterface.h>
-#include <hardware/hardware.h>
-#include <hardware/camera.h>
-#include <binder/IMemory.h>
 #include <fcntl.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+
 #include <linux/ioctl.h>
 #include <linux/msm_mdp.h>
+
+#include <cutils/log.h>
+#include <cutils/properties.h>
+
 #include <gralloc_priv.h>
+#include <hardware/hardware.h>
+#include <hardware/camera.h>
+#include <camera/CameraParameters.h>
+#include "CameraHardwareInterface.h"
+#include <binder/IMemory.h>
+#include <ui/OverlayHtc.h>
 
 #define NO_ERROR 0
-#define LOGV LOGI
+//#define LOGV LOGI
 #define GRALLOC_USAGE_PMEM_PRIVATE_ADSP GRALLOC_USAGE_PRIVATE_0
+
+using android::sp;
+using android::Overlay;
+using android::String8;
+using android::IMemory;
+using android::IMemoryHeap;
+using android::CameraParameters;
+
+using android::CameraInfo;
+using android::HAL_getCameraInfo;
+using android::HAL_getNumberOfCameras;
+using android::CameraHardwareInterface;
 
 struct qcom_mdp_rect {
    uint32_t x; 
@@ -38,9 +64,9 @@ struct qcom_mdp_rect {
 
 struct qcom_mdp_img {
    uint32_t width;
-   int32_t  height;
-   int32_t  format;
-   int32_t  offset;
+   uint32_t height;
+   uint32_t format;
+   uint32_t offset;
    int      memory_id; /* The file descriptor */
 };
 
@@ -52,33 +78,28 @@ struct qcom_mdp_blit_req {
    uint32_t alpha;
    uint32_t transp_mask;
    uint32_t flags;
+   int sharpening_strength;  /* -127 <--> 127, default 64 */
 };
 
 struct blitreq {
-   unsigned int count;
+   uint32_t count;
    struct qcom_mdp_blit_req req;
 };
 
 /* Prototypes and extern functions. */
 extern "C" android::sp<android::CameraHardwareInterface> openCameraHardware(int id);
-int qcamera_device_open(const hw_module_t* module, const char* name,
-                        hw_device_t** device);
-int CameraHAL_GetNum_Cameras(void);
-int CameraHAL_GetCam_Info(int camera_id, struct camera_info *info);
-
-/* Global variables. */
-camera_notify_callback         origNotify_cb    = NULL;
-camera_data_callback           origData_cb      = NULL;
-camera_data_timestamp_callback origDataTS_cb    = NULL;
-camera_request_memory          origCamReqMemory = NULL;
+static int camera_device_open(const hw_module_t* module, const char* name,
+                              hw_device_t** device);
+static int camera_device_close(hw_device_t* device);
+static int camera_get_number_of_cameras(void);
+static int camera_get_camera_info(int camera_id, struct camera_info *info);
 
 android::String8          g_str;
 android::CameraParameters camSettings;
-preview_stream_ops_t      *mWindow = NULL;
 android::sp<android::CameraHardwareInterface> qCamera;
 
 static hw_module_methods_t camera_module_methods = {
-   open: qcamera_device_open
+   open: camera_device_open
 };
 
 camera_module_t HAL_MODULE_INFO_SYM = {
@@ -93,25 +114,77 @@ camera_module_t HAL_MODULE_INFO_SYM = {
         dso: NULL,
         reserved: {0},
     },
-    get_number_of_cameras: CameraHAL_GetNum_Cameras,
-    get_camera_info: CameraHAL_GetCam_Info,
+    get_number_of_cameras: camera_get_number_of_cameras,
+    get_camera_info: camera_get_camera_info,
 };
 
-/* HAL helper functions. */
-void
-CameraHAL_NotifyCb(int32_t msg_type, int32_t ext1,
-                   int32_t ext2, void *user)
+typedef struct priv_camera_device {
+    camera_device_t base;
+    /* specific "private" data can go here (base.priv) */
+    int cameraid;
+    /* new world */
+    preview_stream_ops *window;
+    camera_notify_callback notify_callback;
+    camera_data_callback data_callback;
+    camera_data_timestamp_callback data_timestamp_callback;
+    camera_request_memory request_memory;
+    void *user;
+    /* old world*/
+    int preview_width;
+    int preview_height;
+    sp<Overlay> overlay;
+    gralloc_module_t const *gralloc;
+} priv_camera_device_t;
+
+
+static struct {
+    int type;
+    const char *text;
+} msg_map[] = {
+    {0x0001, "CAMERA_MSG_ERROR"},
+    {0x0002, "CAMERA_MSG_SHUTTER"},
+    {0x0004, "CAMERA_MSG_FOCUS"},
+    {0x0008, "CAMERA_MSG_ZOOM"},
+    {0x0010, "CAMERA_MSG_PREVIEW_FRAME"},
+    {0x0020, "CAMERA_MSG_VIDEO_FRAME"},
+    {0x0040, "CAMERA_MSG_POSTVIEW_FRAME"},
+    {0x0080, "CAMERA_MSG_RAW_IMAGE"},
+    {0x0100, "CAMERA_MSG_COMPRESSED_IMAGE"},
+    {0x0200, "CAMERA_MSG_RAW_IMAGE_NOTIFY"},
+    {0x0400, "CAMERA_MSG_PREVIEW_METADATA"},
+    {0x0000, "CAMERA_MSG_ALL_MSGS"}, //0xFFFF
+    {0x0000, "NULL"},
+};
+
+static void dump_msg(const char *tag, int msg_type)
 {
-   LOGV("CameraHAL_NotifyCb: msg_type:%d ext1:%d ext2:%d user:%p\n",
-        msg_type, ext1, ext2, user);
-   if (origNotify_cb != NULL) {
-      origNotify_cb(msg_type, ext1, ext2, user);
-   }
+    int i;
+    for (i = 0; msg_map[i].type; i++) {
+        if (msg_type & msg_map[i].type) {
+            LOGV("%s: %s", tag, msg_map[i].text);
+        }
+    }
+}
+
+int
+camera_get_number_of_cameras(void)
+{
+   LOGV("CameraHAL_GetNum_Cameras:\n");
+   return 1;
+}
+
+int
+camera_get_camera_info(int camera_id, struct camera_info *info)
+{
+   LOGV("CameraHAL_GetCam_Info:\n");
+   info->facing      = CAMERA_FACING_BACK;
+   info->orientation = 90;
+   return NO_ERROR;
 }
 
 void
 CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
-                         size_t srcOffset, size_t destOffset, 
+                         size_t srcOffset, size_t destOffset,
                          int srcFormat, int destFormat,
                          int x, int y, int w, int h)
 {
@@ -130,9 +203,10 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
     memset(&blit, 0, sizeof(blit));
     blit.count = 1;
 
-    blit.req.flags       = 0;
-    blit.req.alpha       = 0xff;
-    blit.req.transp_mask = 0xffffffff;
+    blit.req.flags               = 0;
+    blit.req.alpha               = 0xff;
+    blit.req.transp_mask         = 0xffffffff;
+    blit.req.sharpening_strength = 64;  /* -127 <--> 127, default 64 */
 
     blit.req.src.width     = w;
     blit.req.src.height    = h;
@@ -142,8 +216,13 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
 
     blit.req.dst.width     = w;
     blit.req.dst.height    = h;
+#if 0
+    /* TODO Fix destination offset handling. */
     blit.req.dst.offset    = destOffset;
-    blit.req.dst.memory_id = destFd; 
+#else
+    blit.req.dst.offset    = 0;
+#endif
+    blit.req.dst.memory_id = destFd;
     blit.req.dst.format    = destFormat;
 
     blit.req.src_rect.x = blit.req.dst_rect.x = x;
@@ -152,62 +231,36 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
     blit.req.src_rect.h = blit.req.dst_rect.h = h;
 
     if (ioctl(fb_fd, MSMFB_BLIT, &blit)) {
-       LOGE("CameraHAL_CopyBuffers_Hw: MSMFB_BLIT failed = %d %s\n", 
+       LOGE("CameraHAL_CopyBuffers_Hw: MSMFB_BLIT failed = %d %s\n",
             errno, strerror(errno));
     }
     close(fb_fd);
 }
 
 void
-CameraHAL_CopyBuffers_Sw(char *dest, char *src, int size)
-{
-   int       i;
-   int       numWords  = size / sizeof(unsigned);
-   unsigned *srcWords  = (unsigned *)src;
-   unsigned *destWords = (unsigned *)dest;
-
-   for (i = 0; i < numWords; i++) {
-      if ((i % 8) == 0 && (i + 8) < numWords) {
-         __builtin_prefetch(srcWords  + 8, 0, 0);
-         __builtin_prefetch(destWords + 8, 1, 0);
-      }
-      *destWords++ = *srcWords++;
-   }
-   if (__builtin_expect((size - (numWords * sizeof(unsigned))) > 0, 0)) {
-      int numBytes = size - (numWords * sizeof(unsigned));
-      char *destBytes = (char *)destWords;
-      char *srcBytes  = (char *)srcWords;
-      for (i = 0; i < numBytes; i++) {
-         *destBytes++ = *srcBytes++;
-      }
-   }
-}
-
-void
-CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr, 
+CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
                             preview_stream_ops_t *mWindow,
-                            camera_request_memory getMemory,
-                            int32_t previewWidth, int32_t previewHeight)
+			    int32_t previewWidth, int32_t previewHeight)
 {
-   if (mWindow != NULL && getMemory != NULL) {
+   if (mWindow != NULL) {
       ssize_t  offset;
       size_t   size;
       int32_t  previewFormat = MDP_Y_CBCR_H2V2;
       int32_t  destFormat    = MDP_RGBA_8888;
 
       android::status_t retVal;
-      android::sp<android::IMemoryHeap> mHeap = dataPtr->getMemory(&offset, 
+      android::sp<android::IMemoryHeap> mHeap = dataPtr->getMemory(&offset,
                                                                    &size);
 
       LOGV("CameraHAL_HandlePreviewData: previewWidth:%d previewHeight:%d "
-           "offset:%#x size:%#x base:%p\n", previewWidth, previewHeight, 
+           "offset:%#x size:%#x base:%p\n", previewWidth, previewHeight,
            (unsigned)offset, size, mHeap != NULL ? mHeap->base() : 0);
 
       mWindow->set_usage(mWindow,
                          GRALLOC_USAGE_PMEM_PRIVATE_ADSP |
                          GRALLOC_USAGE_SW_READ_OFTEN);
       retVal = mWindow->set_buffers_geometry(mWindow,
-                                             previewWidth, previewHeight, 
+                                             previewWidth, previewHeight,
                                              HAL_PIXEL_FORMAT_RGBA_8888);
       if (retVal == NO_ERROR) {
          int32_t          stride;
@@ -218,11 +271,11 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
          if (retVal == NO_ERROR) {
             retVal = mWindow->lock_buffer(mWindow, bufHandle);
             if (retVal == NO_ERROR) {
-               private_handle_t const *privHandle = 
+               private_handle_t const *privHandle =
                   reinterpret_cast<private_handle_t const *>(*bufHandle);
                CameraHAL_CopyBuffers_Hw(mHeap->getHeapID(), privHandle->fd,
-                                        offset, privHandle->offset, 
-                                        previewFormat, destFormat, 
+                                        offset, privHandle->offset,
+                                        previewFormat, destFormat,
                                         0, 0, previewWidth, previewHeight);
                mWindow->enqueue_buffer(mWindow, bufHandle);
                LOGV("CameraHAL_HandlePreviewData: enqueued buffer\n");
@@ -235,88 +288,6 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
          }
       }
    }
-}
-
-camera_memory_t *
-CameraHAL_GenClientData(const android::sp<android::IMemory> &dataPtr, 
-                        camera_request_memory reqClientMemory,
-                        void *user)
-{
-   ssize_t          offset;
-   size_t           size;
-   camera_memory_t *clientData = NULL;
-   android::sp<android::IMemoryHeap> mHeap = dataPtr->getMemory(&offset, &size);
-
-   LOGV("CameraHAL_GenClientData: offset:%#x size:%#x base:%p\n",
-        (unsigned)offset, size, mHeap != NULL ? mHeap->base() : 0);
-
-   clientData = reqClientMemory(-1, size, 1, user);
-   if (clientData != NULL) {
-      CameraHAL_CopyBuffers_Sw((char *)clientData->data, 
-                               (char *)(mHeap->base()) + offset, size);
-   } else {
-      LOGV("CameraHAL_GenClientData: ERROR allocating memory from client\n");
-   }
-   return clientData;
-}
-
-void 
-CameraHAL_DataCb(int32_t msg_type, const android::sp<android::IMemory>& dataPtr,
-                 void *user)
-{
-   LOGV("CameraHAL_DataCb: msg_type:%d user:%p\n", msg_type, user);
-   if (msg_type == CAMERA_MSG_PREVIEW_FRAME) {
-      int32_t previewWidth, previewHeight;
-      android::CameraParameters hwParameters = qCamera->getParameters();
-      hwParameters.getPreviewSize(&previewWidth, &previewHeight);
-      CameraHAL_HandlePreviewData(dataPtr, mWindow, origCamReqMemory,
-                                  previewWidth, previewHeight);
-   }
-   if (origData_cb != NULL && origCamReqMemory != NULL) {
-      camera_memory_t *clientData = CameraHAL_GenClientData(dataPtr,
-                                       origCamReqMemory, user);
-      if (clientData != NULL) {
-         LOGV("CameraHAL_DataCb: Posting data to client\n");
-         origData_cb(msg_type, clientData, 0, NULL, user);
-      }
-   }
-}
-
-void 
-CameraHAL_DataTSCb(nsecs_t timestamp, int32_t msg_type,
-                   const android::sp<android::IMemory>& dataPtr, void *user)
-{
-   LOGV("CameraHAL_DataTSCb: timestamp:%lld msg_type:%d user:%p\n",
-        timestamp /1000, msg_type, user);
-
-   if (origDataTS_cb != NULL && origCamReqMemory != NULL) {
-      camera_memory_t *clientData = CameraHAL_GenClientData(dataPtr,
-                                       origCamReqMemory, user);
-      if (clientData != NULL) {
-         LOGV("CameraHAL_DataTSCb: Posting data to client timestamp:%lld\n", 
-              systemTime());
-         origDataTS_cb(timestamp, msg_type, clientData, 0, user);
-         qCamera->releaseRecordingFrame(dataPtr);
-      } else {
-         LOGD("CameraHAL_DataTSCb: ERROR allocating memory from client\n");
-      }
-   }
-}
-
-int
-CameraHAL_GetNum_Cameras(void)
-{
-   LOGE("CameraHAL_GetNum_Cameras:\n");
-   return 1;
-}
-
-int 
-CameraHAL_GetCam_Info(int camera_id, struct camera_info *info)
-{
-   LOGV("CameraHAL_GetCam_Info:\n");
-   info->facing      = CAMERA_FACING_BACK;
-   info->orientation = 90;
-   return NO_ERROR;
 }
 
 void
@@ -370,317 +341,928 @@ CameraHAL_FixupParams(android::CameraParameters &settings)
    }
 }
 
-/* Hardware Camera interface handlers. */
+/*******************************************************************
+ * overlay hook
+ *******************************************************************/
+
+static void wrap_set_fd_hook(void *data, int fd)
+{
+    priv_camera_device_t* dev = NULL;
+    LOGV("%s+++: data %p", __FUNCTION__, data);
+
+    if(!data)
+        return;
+
+    dev = (priv_camera_device_t*) data;
+    LOGV("%s---: fd %i", __FUNCTION__, fd);
+}
+
+static void wrap_set_crop_hook(void *data,
+                               uint32_t x, uint32_t y,
+                               uint32_t w, uint32_t h)
+{
+    priv_camera_device_t* dev = NULL;
+    LOGV("%s+++: %p", __FUNCTION__,data);
+
+    if(!data)
+        return;
+
+    dev = (priv_camera_device_t*) data;
+    LOGV("%s---: %i %i %i %i", __FUNCTION__, x, y, w, h);
+}
+//QiSS ME for preview
+static void wrap_queue_buffer_hook(void *data, void* buffer)
+{
+    sp<IMemoryHeap> heap;
+    priv_camera_device_t* dev = NULL;
+    preview_stream_ops* window = NULL;
+    LOGV("%s+++: %p", __FUNCTION__,data);
+
+    if(!data)
+        return;
+
+    dev = (priv_camera_device_t*) data;
+
+    window = dev->window;
+
+	//QiSS ME fix video preview crash
+    if(window == 0)
+		return;
+
+    heap =  qCamera->getPreviewHeap();
+    if(heap == 0)
+		return;
+
+    int offset = (int)buffer;
+    char *frame = (char *)(heap->base()) + offset;
+
+    LOGV("%s: base:%p offset:%i frame:%p", __FUNCTION__,
+         heap->base(), offset, frame);
+
+    int stride;
+    void *vaddr;
+    buffer_handle_t *buf_handle;
+
+    int width = dev->preview_width;
+    int height = dev->preview_height;
+    if (0 != window->dequeue_buffer(window, &buf_handle, &stride)) {
+        LOGE("%s: could not dequeue gralloc buffer", __FUNCTION__);
+        goto skipframe;
+    }
+    if (0 == dev->gralloc->lock(dev->gralloc, *buf_handle,
+                                GRALLOC_USAGE_SW_WRITE_MASK,
+                                0, 0, width, height, &vaddr)) {
+        // the code below assumes YUV, not RGB
+        memcpy(vaddr, frame, width * height * 3 / 2);
+        LOGV("%s: copy frame to gralloc buffer", __FUNCTION__);
+    } else {
+        LOGE("%s: could not lock gralloc buffer", __FUNCTION__);
+        goto skipframe;
+    }
+
+    dev->gralloc->unlock(dev->gralloc, *buf_handle);
+
+    if (0 != window->enqueue_buffer(window, buf_handle)) {
+        LOGE("%s: could not dequeue gralloc buffer", __FUNCTION__);
+        goto skipframe;
+    }
+
+skipframe:
+
+#ifdef DUMP_PREVIEW_FRAMES
+    static int frameCnt = 0;
+    int written;
+    if (frameCnt >= 100 && frameCnt <= 109 ) {
+        char path[128];
+        snprintf(path, sizeof(path), "/data/%d_preview.yuv", frameCnt);
+        int file_fd = open(path, O_RDWR | O_CREAT, 0666);
+        LOGI("dumping preview frame %d", frameCnt);
+        if (file_fd < 0) {
+            LOGE("cannot open file:%s (error:%i)\n", path, file_fd);
+        }
+        else
+        {
+            LOGV("dumping data");
+            written = write(file_fd, (char *)frame,
+                            dev->preview_frame_size);
+            if(written < 0)
+                LOGE("error in data write");
+        }
+        close(file_fd);
+    }
+    frameCnt++;
+#endif
+    LOGV("%s---: ", __FUNCTION__);
+
+    return;
+}
+
+/*******************************************************************
+ * camera interface callback
+ *******************************************************************/
+
+static camera_memory_t *wrap_memory_data(priv_camera_device_t *dev,
+                                         const sp<IMemory>& dataPtr)
+{
+    void *data;
+    size_t size;
+    ssize_t offset;
+    sp<IMemoryHeap> heap;
+    camera_memory_t *mem;
+
+    LOGV("%s+++,dev->request_memory %p", __FUNCTION__,dev->request_memory);
+
+    if (!dev->request_memory)
+        return NULL;
+
+    heap = dataPtr->getMemory(&offset, &size);
+    data = (void *)((char *)(heap->base()) + offset);
+
+    LOGV("%s: data: %p size: %i", __FUNCTION__, data, size);
+
+    LOGV(" offset:0x%x ",  (uint)offset);
+
+    //#define DUMP_CAPTURE_JPEG
+#ifdef DUMP_CAPTURE_JPEG
+    static int frameCnt = 0;
+    int written;
+    char path[128];
+    snprintf(path, sizeof(path), "/data/%d_capture.jpg", frameCnt);
+    int file_fd = open(path, O_RDWR | O_CREAT, 0666);
+    LOGI("dumping capture jpeg %d", frameCnt);
+    if (file_fd < 0) {
+        LOGE("cannot open file:%s (error:%i)\n", path, file_fd);
+    }
+    else
+    {
+        LOGV("dumping jpeg");
+        written = write(file_fd, (char *)data,
+                        size);
+        if(written < 0)
+            LOGE("error in data write");
+    }
+    close(file_fd);
+    frameCnt++;
+#endif
+
+    mem = dev->request_memory(-1, size, 1, dev->user);
+
+    LOGV(" mem:%p,mem->data%p ",  mem,mem->data);
+
+    memcpy(mem->data, data, size);
+    LOGV("%s---", __FUNCTION__);
+
+    return mem;
+}
+
+static void wrap_notify_callback(int32_t msg_type, int32_t ext1,
+                                 int32_t ext2, void* user)
+{
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: type %i user %p", __FUNCTION__, msg_type,user);
+    dump_msg(__FUNCTION__, msg_type);
+
+    if(!user)
+        return;
+
+    dev = (priv_camera_device_t*) user;
+
+    if (dev->notify_callback)
+        dev->notify_callback(msg_type, ext1, ext2, dev->user);
+    LOGV("%s---", __FUNCTION__);
+
+}
+//QiSS ME for capture
+static void wrap_data_callback(int32_t msg_type, const sp<IMemory>& dataPtr,
+                               void* user)
+{
+    camera_memory_t *data = NULL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: type %i user %p", __FUNCTION__, msg_type,user);
+    dump_msg(__FUNCTION__, msg_type);
+
+    if(!user)
+        return;
+
+    dev = (priv_camera_device_t*) user;
+
+    if(msg_type ==CAMERA_MSG_RAW_IMAGE)
+    {
+	qCamera->disableMsgType(CAMERA_MSG_RAW_IMAGE);
+        return;
+    }
+
+    if (msg_type == CAMERA_MSG_PREVIEW_FRAME) {
+        int32_t previewWidth, previewHeight;
+        android::CameraParameters hwParameters = qCamera->getParameters();
+        hwParameters.getPreviewSize(&previewWidth, &previewHeight);
+        CameraHAL_HandlePreviewData(dataPtr, dev->window, previewWidth, previewHeight);
+	return;
+
+    }
+
+    data = wrap_memory_data(dev, dataPtr);
+
+    if (dev->data_callback)
+        dev->data_callback(msg_type, data, 0, NULL, dev->user);
+
+    LOGV("%s---", __FUNCTION__);
+
+}
+//QiSS ME for record
+
+static void wrap_data_callback_timestamp(nsecs_t timestamp, int32_t msg_type,
+                                         const sp<IMemory>& dataPtr, void* user)
+{
+    priv_camera_device_t* dev = NULL;
+    camera_memory_t *data = NULL;
+
+    LOGV("%s+++: type %i user %p", __FUNCTION__, msg_type,user);
+    dump_msg(__FUNCTION__, msg_type);
+
+    if(!user)
+        return;
+
+    dev = (priv_camera_device_t*) user;
+
+    data = wrap_memory_data(dev, dataPtr);
+
+    if (dev->data_timestamp_callback)
+        dev->data_timestamp_callback(timestamp,msg_type, data, 0, dev->user);
+
+    qCamera->releaseRecordingFrame(dataPtr);//QiSS ME need release or record will stop
+
+    if ( NULL != data ) {
+        data->release(data);
+    }
+
+    LOGV("%s---", __FUNCTION__);
+
+}
+
+/*******************************************************************
+ * implementation of priv_camera_device_ops functions
+ *******************************************************************/
+
 int 
-qcamera_set_preview_window(struct camera_device * device, 
+camera_set_preview_window(struct camera_device * device,
                            struct preview_stream_ops *window)
 {
-   LOGV("qcamera_set_preview_window : Window :%p\n", window);
-   if (device == NULL) {
-      LOGE("qcamera_set_preview_window : Invalid device.\n");
-      return -EINVAL;
-   } else {
-      LOGV("qcamera_set_preview_window : window :%p\n", window);
-      mWindow = window;
-      return 0;
-   }
+    int rv = -EINVAL;
+    int min_bufs = -1;
+    int kBufferCount = 4;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++,device %p", __FUNCTION__,device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    dev->window = window;
+
+    if (!window) {
+        LOGV("%s---: window is NULL", __FUNCTION__);
+        return 0;
+    }
+
+    if (!dev->gralloc) {
+        if (hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
+                          (const hw_module_t **)&(dev->gralloc))) {
+            LOGE("%s: Fail on loading gralloc HAL", __FUNCTION__);
+        }
+    }
+
+    if (window->get_min_undequeued_buffer_count(window, &min_bufs)) {
+        LOGE("%s---: could not retrieve min undequeued buffer count", __FUNCTION__);
+        return -1;
+    }
+
+    LOGV("%s: bufs:%i", __FUNCTION__, min_bufs);
+
+    if (min_bufs >= kBufferCount) {
+        LOGE("%s: min undequeued buffer count %i is too high (expecting at most %i)",
+             __FUNCTION__, min_bufs, kBufferCount - 1);
+    }
+
+    LOGI("%s: setting buffer count to %i", __FUNCTION__, kBufferCount);
+    if (window->set_buffer_count(window, kBufferCount)) {
+        LOGE("%s---: could not set buffer count", __FUNCTION__);
+        return -1;
+    }
+
+    int preview_width;
+    int preview_height;
+    CameraParameters params(qCamera->getParameters());
+    params.getPreviewSize(&preview_width, &preview_height);
+    int hal_pixel_format = HAL_PIXEL_FORMAT_YCrCb_420_SP;
+
+    const char *str_preview_format = params.getPreviewFormat();
+    LOGI("%s: preview format %s", __FUNCTION__, str_preview_format);
+
+    //Enable panorama without camera application "hacks"
+    //if (window->set_usage(window, GRALLOC_USAGE_SW_WRITE_MASK)) {
+    //    LOGE("%s---: could not set usage on gralloc buffer", __FUNCTION__);
+    //    return -1;
+    //}
+
+    window->set_usage(window, GRALLOC_USAGE_PMEM_PRIVATE_ADSP | GRALLOC_USAGE_SW_READ_OFTEN);
+
+    if (window->set_buffers_geometry(window, preview_width,
+                                     preview_height, hal_pixel_format)) {
+        LOGE("%s---: could not set buffers geometry to %s",
+             __FUNCTION__, str_preview_format);
+        return -1;
+    }
+
+    dev->preview_width = preview_width;
+    dev->preview_height = preview_height;
+
+    dev->overlay =  new Overlay(wrap_set_fd_hook,
+                                wrap_set_crop_hook,
+                                wrap_queue_buffer_hook,
+                                (void *)dev);
+
+    LOGV("%s---,rv %d", __FUNCTION__,rv);
+
+    return rv;
 }
 
 void
-qcamera_set_callbacks(struct camera_device * device,
+camera_set_callbacks(struct camera_device * device,
                       camera_notify_callback notify_cb,
                       camera_data_callback data_cb,
                       camera_data_timestamp_callback data_cb_timestamp,
                       camera_request_memory get_memory, void *user)
 {
-   LOGV("qcamera_set_callbacks: notify_cb: %p, data_cb: %p "
-        "data_cb_timestamp: %p, get_memory: %p, user :%p",
-        notify_cb, data_cb, data_cb_timestamp, get_memory, user);
+    priv_camera_device_t* dev = NULL;
 
-   origNotify_cb    = notify_cb;
-   origData_cb      = data_cb;
-   origDataTS_cb    = data_cb_timestamp;
-   origCamReqMemory = get_memory;
-   qCamera->setCallbacks(CameraHAL_NotifyCb, CameraHAL_DataCb,
-                         CameraHAL_DataTSCb, user);
+    LOGV("%s+++,device %p", __FUNCTION__,device);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    dev->notify_callback = notify_cb;
+    dev->data_callback = data_cb;
+    dev->data_timestamp_callback = data_cb_timestamp;
+    dev->request_memory = get_memory;
+    dev->user = user;
+
+    qCamera->setCallbacks(wrap_notify_callback, wrap_data_callback,
+                                             wrap_data_callback_timestamp, (void *)dev);
+
+    LOGV("%s---", __FUNCTION__);
 }
 
 void 
-qcamera_enable_msg_type(struct camera_device * device, int32_t msg_type)
+camera_enable_msg_type(struct camera_device * device, int32_t msg_type)
 {
-   LOGV("qcamera_enable_msg_type: msg_type:%#x\n", msg_type);
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: type %i device %p", __FUNCTION__, msg_type,device);
+    if (msg_type & CAMERA_MSG_RAW_IMAGE_NOTIFY) {
+        msg_type &= ~CAMERA_MSG_RAW_IMAGE_NOTIFY;
+        msg_type |= CAMERA_MSG_RAW_IMAGE;
+	}
+
+    dump_msg(__FUNCTION__, msg_type);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    qCamera->enableMsgType(msg_type);
+    LOGV("%s---", __FUNCTION__);
+}
+
+void 
+camera_disable_msg_type(struct camera_device * device, int32_t msg_type)
+{
    if (msg_type == 0xfff) {
       msg_type = 0x1ff;
-   } else {
-      msg_type &= ~(CAMERA_MSG_PREVIEW_METADATA | CAMERA_MSG_RAW_IMAGE_NOTIFY);
    }
-   qCamera->enableMsgType(msg_type);
+
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: type %i device %p", __FUNCTION__, msg_type,device);
+    dump_msg(__FUNCTION__, msg_type);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    qCamera->disableMsgType(msg_type);
+    LOGV("%s---", __FUNCTION__);
+}
+
+int 
+camera_msg_type_enabled(struct camera_device * device, int32_t msg_type)
+{
+    priv_camera_device_t* dev = NULL;
+    int rv = -EINVAL;
+
+    LOGV("%s+++: type %i device %p", __FUNCTION__, msg_type,device);
+
+    if(!device)
+        return 0;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->msgTypeEnabled(msg_type);
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
+}
+
+int 
+camera_start_preview(struct camera_device * device)
+{
+    /* TODO: Remove hack. */
+    if (!qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME)) {
+       qCamera->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+    }
+
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->startPreview();
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+
+    return rv;
 }
 
 void 
-qcamera_disable_msg_type(struct camera_device * device, int32_t msg_type)
+camera_stop_preview(struct camera_device * device)
 {
-   LOGV("qcamera_disable_msg_type: msg_type:%#x\n", msg_type);
-   if (msg_type == 0xfff) {
-      msg_type = 0x1ff;
-   }
-   qCamera->disableMsgType(msg_type);
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    qCamera->stopPreview();
+    LOGV("%s---", __FUNCTION__);
 }
 
 int 
-qcamera_msg_type_enabled(struct camera_device * device, int32_t msg_type)
+camera_preview_enabled(struct camera_device * device)
 {
-   LOGV("qcamera_msg_type_enabled: msg_type:%d\n", msg_type);
-   return qCamera->msgTypeEnabled(msg_type);
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->previewEnabled();
+
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+
+    return rv;
 }
 
 int 
-qcamera_start_preview(struct camera_device * device)
+camera_store_meta_data_in_buffers(struct camera_device * device, int enable)
 {
-   LOGV("qcamera_start_preview: Enabling CAMERA_MSG_PREVIEW_FRAME\n");
-
-   /* TODO: Remove hack. */
-   LOGV("qcamera_start_preview: Preview enabled:%d msg enabled:%d\n",
-        qCamera->previewEnabled(),
-        qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME));
-   if (!qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME)) {
-      qCamera->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-   }
-   return qCamera->startPreview();
-}
-
-void 
-qcamera_stop_preview(struct camera_device * device)
-{
-   LOGV("qcamera_stop_preview: msgenabled:%d\n",
-        qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME));
-
-   /* TODO: Remove hack. */
-   if (qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME)) {
-      qCamera->disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-   }
-   return qCamera->stopPreview();
-}
-
-int 
-qcamera_preview_enabled(struct camera_device * device)
-{
-   LOGV("qcamera_preview_enabled:\n");
-   return qCamera->previewEnabled() ? 1 : 0;
-}
-
-int 
-qcamera_store_meta_data_in_buffers(struct camera_device * device, int enable)
-{
-   LOGV("qcamera_store_meta_data_in_buffers:\n");
+   LOGV("camera_store_meta_data_in_buffers:\n");
    return NO_ERROR;
 }
 
 int 
-qcamera_start_recording(struct camera_device * device)
+camera_start_recording(struct camera_device * device)
 {
-   LOGV("qcamera_start_recording\n");
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
 
-   /* TODO: Remove hack. */
-   qCamera->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
-   qCamera->startRecording();
-   return NO_ERROR;
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    /* TODO: Remove hack. */
+    qCamera->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
+
+    rv = qCamera->startRecording();
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+
+    //return rv;
+    return NO_ERROR;
 }
 
 void 
-qcamera_stop_recording(struct camera_device * device)
+camera_stop_recording(struct camera_device * device)
 {
-   LOGV("qcamera_stop_recording:\n");
+    priv_camera_device_t* dev = NULL;
 
-   /* TODO: Remove hack. */
-   qCamera->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
-   qCamera->stopRecording();
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    /* TODO: Remove hack. */
+    qCamera->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
+
+    qCamera->stopRecording();
+
+    //QiSS ME force start preview when recording stop
+    qCamera->startPreview();
+    LOGV("%s---", __FUNCTION__);
 }
 
 int 
-qcamera_recording_enabled(struct camera_device * device)
+camera_recording_enabled(struct camera_device * device)
 {
-   LOGV("qcamera_recording_enabled:\n");
-   return (int)qCamera->recordingEnabled();
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->recordingEnabled();
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 void 
-qcamera_release_recording_frame(struct camera_device * device, 
+camera_release_recording_frame(struct camera_device * device,
                                 const void *opaque)
 {
    /* 
     * We release the frame immediately in CameraHAL_DataTSCb after making a
     * copy. So, this is just a NOP.
     */
-   LOGV("qcamera_release_recording_frame: opaque:%p\n", opaque);
+   LOGV("camera_release_recording_frame: opaque:%p\n", opaque);
 }
 
 int 
-qcamera_auto_focus(struct camera_device * device)
+camera_auto_focus(struct camera_device * device)
 {
-   LOGV("qcamera_auto_focus:\n");
-   qCamera->autoFocus();
-   return NO_ERROR;
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->autoFocus();
+
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 int 
-qcamera_cancel_auto_focus(struct camera_device * device)
+camera_cancel_auto_focus(struct camera_device * device)
 {
-   LOGV("qcamera_cancel_auto_focus:\n");
-   qCamera->cancelAutoFocus();
-   return NO_ERROR;
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->cancelAutoFocus();
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 int 
-qcamera_take_picture(struct camera_device * device)
+camera_take_picture(struct camera_device * device)
 {
-   LOGV("qcamera_take_picture:\n");
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
 
-   /* TODO: Remove hack. */
-   qCamera->enableMsgType(CAMERA_MSG_SHUTTER |
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    /* TODO: Remove hack. */
+    qCamera->enableMsgType(CAMERA_MSG_SHUTTER |
                          CAMERA_MSG_POSTVIEW_FRAME |
                          CAMERA_MSG_RAW_IMAGE |
                          CAMERA_MSG_COMPRESSED_IMAGE);
 
-   qCamera->takePicture();
-   return NO_ERROR;
+    rv = qCamera->takePicture();
+
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    //return rv;
+    return NO_ERROR;
 }
 
 int 
-qcamera_cancel_picture(struct camera_device * device)
+camera_cancel_picture(struct camera_device * device)
 {
-   LOGV("camera_cancel_picture:\n");
-   qCamera->cancelPicture();
-   return NO_ERROR;
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->cancelPicture();
+
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 int 
-qcamera_set_parameters(struct camera_device * device, const char *params)
+camera_set_parameters(struct camera_device * device, const char *params)
 {
-   LOGV("qcamera_set_parameters: %s\n", params);
-   g_str = android::String8(params);
-   camSettings.unflatten(g_str);
-   qCamera->setParameters(camSettings);
-   return NO_ERROR;
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+    CameraParameters camParams;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    String8 params_str8(params);
+    camParams.unflatten(params_str8);
+#if 0
+    camParams.dump();
+#endif
+
+    rv = qCamera->setParameters(camParams);
+
+#if 0
+    camParams.dump();
+#endif
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 char* 
-qcamera_get_parameters(struct camera_device * device)
+camera_get_parameters(struct camera_device * device)
 { 
-   char *rc = NULL;
-   LOGV("qcamera_get_parameters\n");
-   camSettings = qCamera->getParameters();
-   LOGV("qcamera_get_parameters: after calling qCamera->getParameters()\n");
-   CameraHAL_FixupParams(camSettings);
-   g_str = camSettings.flatten();
-   rc = strdup((char *)g_str.string());
-   LOGV("camera_get_parameters: returning rc:%p :%s\n", 
-        rc, (rc != NULL) ? rc : "EMPTY STRING");
-   return rc;
+    char* params = NULL;
+    priv_camera_device_t* dev = NULL;
+    String8 params_str8;
+    CameraParameters camParams;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return NULL;
+
+    dev = (priv_camera_device_t*) device;
+
+    camParams = qCamera->getParameters();
+#if 0
+    camParams.dump();
+#endif
+
+    CameraHAL_FixupParams(camParams);
+
+    camParams.set("orientation", "landscape");
+
+    params_str8 = camParams.flatten();
+    params = (char*) malloc(sizeof(char) * (params_str8.length()+1));
+    strcpy(params, params_str8.string());
+
+#if 0
+    camParams.dump();
+#endif
+    LOGV("%s---", __FUNCTION__);
+    return params;
 }
 
 void 
-qcamera_put_parameters(struct camera_device *device, char *params)
+camera_put_parameters(struct camera_device *device, char *params)
 {
-   LOGV("qcamera_put_parameters: params:%p %s", params, params);
-   free(params);
+    LOGV("%s+++", __FUNCTION__);
+    free(params);
+    LOGV("%s---", __FUNCTION__);
 }
 
 
 int 
-qcamera_send_command(struct camera_device * device, int32_t cmd, 
+camera_send_command(struct camera_device * device, int32_t cmd,
                         int32_t arg0, int32_t arg1)
 {
-   LOGV("qcamera_send_command: cmd:%d arg0:%d arg1:%d\n", 
-        cmd, arg0, arg1);
-   return NO_ERROR;
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s: cmd %i,device %p", __FUNCTION__, cmd,device);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    rv = qCamera->sendCommand(cmd, arg0, arg1);
+    LOGV("%s--- rv %d", __FUNCTION__,rv);
+    return rv;
 }
 
 void 
-qcamera_release(struct camera_device * device)
+camera_release(struct camera_device * device)
 {
-   LOGV("camera_release:\n");
-   qCamera->release();
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    if(!device)
+        return;
+
+    dev = (priv_camera_device_t*) device;
+
+    qCamera->release();
+    LOGV("%s---", __FUNCTION__);
 }
 
 int 
-qcamera_dump(struct camera_device * device, int fd)
+camera_dump(struct camera_device * device, int fd)
 {
-   LOGV("qcamera_dump:\n");
-   android::Vector<android::String16> args;
-   return qCamera->dump(fd, args);
+    int rv = -EINVAL;
+    priv_camera_device_t* dev = NULL;
+    android::Vector<android::String16> args;
+    LOGV("%s", __FUNCTION__);
+
+    if(!device)
+        return rv;
+
+    dev = (priv_camera_device_t*) device;
+
+    return qCamera->dump(fd, args);
 }
 
 int 
 camera_device_close(hw_device_t* device)
 {
-   int rc = -EINVAL;
-   LOGD("camera_device_close\n");
-   camera_device_t *cameraDev = (camera_device_t *)device;
-   if (cameraDev) {
-      camera_device_ops_t *camera_ops = cameraDev->ops;
-      if (camera_ops) {
-         if (qCamera != NULL) {
-            qCamera.clear();
-         }
-         free(camera_ops);
-      }
-      free(cameraDev);
-      rc = NO_ERROR;
-   }
-   return rc;
+    int ret = 0;
+    priv_camera_device_t* dev = NULL;
+
+    LOGV("%s+++: device %p", __FUNCTION__, device);
+
+    //android::Mutex::Autolock lock(gCameraDeviceLock);
+
+    if (!device) {
+        ret = -EINVAL;
+        goto done;
+    }
+
+    dev = (priv_camera_device_t*) device;
+
+    if (dev) {
+        qCamera = NULL;
+
+        if (dev->base.ops) {
+            free(dev->base.ops);
+        }
+        free(dev);
+    }
+done:
+#ifdef HEAPTRACKER
+    heaptracker_free_leaked_memory();
+#endif
+    LOGV("%s--- ret %d", __FUNCTION__,ret);
+
+    return ret;
 }
 
 int 
-qcamera_device_open(const hw_module_t* module, const char* name, 
+camera_device_open(const hw_module_t* module, const char* name,
                    hw_device_t** device)
 {
 
-   int cameraId = atoi(name);
+    int rv = 0;
+    int cameraid;
+    int num_cameras = 0;
+    priv_camera_device_t* priv_camera_device = NULL;
+    camera_device_ops_t* camera_ops = NULL;
+    sp<CameraHardwareInterface> camera = NULL;
 
-   LOGD("qcamera_device_open: name:%s device:%p cameraId:%d\n", 
-        name, device, cameraId);
+    //android::Mutex::Autolock lock(gCameraDeviceLock);
 
-   qCamera = openCameraHardware(cameraId);
-   camera_device_t* camera_device = NULL;
-   camera_device_ops_t* camera_ops = NULL;
 
-   camera_device = (camera_device_t*)malloc(sizeof(*camera_device));
-   camera_ops = (camera_device_ops_t*)malloc(sizeof(*camera_ops));
-   memset(camera_device, 0, sizeof(*camera_device));
-   memset(camera_ops, 0, sizeof(*camera_ops));
+    LOGI("camera_device open+++");
 
-   camera_device->common.tag              = HARDWARE_DEVICE_TAG;
-   camera_device->common.version          = 0;
-   camera_device->common.module           = (hw_module_t *)(module);
-   camera_device->common.close            = camera_device_close;
-   camera_device->ops                     = camera_ops;
+    if (name != NULL) {
+        cameraid = atoi(name);
 
-   camera_ops->set_preview_window         = qcamera_set_preview_window;
-   camera_ops->set_callbacks              = qcamera_set_callbacks;
-   camera_ops->enable_msg_type            = qcamera_enable_msg_type;
-   camera_ops->disable_msg_type           = qcamera_disable_msg_type;
-   camera_ops->msg_type_enabled           = qcamera_msg_type_enabled;
-   camera_ops->start_preview              = qcamera_start_preview;
-   camera_ops->stop_preview               = qcamera_stop_preview;
-   camera_ops->preview_enabled            = qcamera_preview_enabled;
-   camera_ops->store_meta_data_in_buffers = qcamera_store_meta_data_in_buffers;
-   camera_ops->start_recording            = qcamera_start_recording;
-   camera_ops->stop_recording             = qcamera_stop_recording;
-   camera_ops->recording_enabled          = qcamera_recording_enabled;
-   camera_ops->release_recording_frame    = qcamera_release_recording_frame;
-   camera_ops->auto_focus                 = qcamera_auto_focus;
-   camera_ops->cancel_auto_focus          = qcamera_cancel_auto_focus;
-   camera_ops->take_picture               = qcamera_take_picture;
-   camera_ops->cancel_picture             = qcamera_cancel_picture;
+        priv_camera_device = (priv_camera_device_t*)malloc(sizeof(*priv_camera_device));
+        if(!priv_camera_device)
+        {
+            LOGE("camera_device allocation fail");
+            rv = -ENOMEM;
+            goto fail;
+        }
 
-   camera_ops->set_parameters             = qcamera_set_parameters;
-   camera_ops->get_parameters             = qcamera_get_parameters;
-   camera_ops->put_parameters             = qcamera_put_parameters;
-   camera_ops->send_command               = qcamera_send_command;
-   camera_ops->release                    = qcamera_release;
-   camera_ops->dump                       = qcamera_dump;
+        camera_ops = (camera_device_ops_t*)malloc(sizeof(*camera_ops));
+        if(!camera_ops)
+        {
+            LOGE("camera_ops allocation fail");
+            rv = -ENOMEM;
+            goto fail;
+        }
 
-   *device = &camera_device->common;
-   return NO_ERROR;
+        memset(priv_camera_device, 0, sizeof(*priv_camera_device));
+        memset(camera_ops, 0, sizeof(*camera_ops));
+
+        priv_camera_device->base.common.tag = HARDWARE_DEVICE_TAG;
+        priv_camera_device->base.common.version = 0;
+        priv_camera_device->base.common.module = (hw_module_t *)(module);
+        priv_camera_device->base.common.close = camera_device_close;
+        priv_camera_device->base.ops = camera_ops;
+
+        camera_ops->set_preview_window = camera_set_preview_window;
+        camera_ops->set_callbacks = camera_set_callbacks;
+        camera_ops->enable_msg_type = camera_enable_msg_type;
+        camera_ops->disable_msg_type = camera_disable_msg_type;
+        camera_ops->msg_type_enabled = camera_msg_type_enabled;
+        camera_ops->start_preview = camera_start_preview;
+        camera_ops->stop_preview = camera_stop_preview;
+        camera_ops->preview_enabled = camera_preview_enabled;
+        camera_ops->store_meta_data_in_buffers = camera_store_meta_data_in_buffers;
+        camera_ops->start_recording = camera_start_recording;
+        camera_ops->stop_recording = camera_stop_recording;
+        camera_ops->recording_enabled = camera_recording_enabled;
+        camera_ops->release_recording_frame = camera_release_recording_frame;
+        camera_ops->auto_focus = camera_auto_focus;
+        camera_ops->cancel_auto_focus = camera_cancel_auto_focus;
+        camera_ops->take_picture = camera_take_picture;
+        camera_ops->cancel_picture = camera_cancel_picture;
+        camera_ops->set_parameters = camera_set_parameters;
+        camera_ops->get_parameters = camera_get_parameters;
+        camera_ops->put_parameters = camera_put_parameters;
+        camera_ops->send_command = camera_send_command;
+        camera_ops->release = camera_release;
+        camera_ops->dump = camera_dump;
+
+        *device = &priv_camera_device->base.common;
+
+        // -------- specific stuff --------
+
+        priv_camera_device->cameraid = cameraid;
+
+        camera = openCameraHardware(cameraid);
+
+        if(camera == NULL)
+        {
+            LOGE("Couldn't create instance of CameraHal class");
+            rv = -ENOMEM;
+            goto fail;
+        }
+
+        qCamera = camera;
+    }
+
+    LOGI("%s---ok rv %d", __FUNCTION__,rv);
+
+    return rv;
+
+fail:
+    if(priv_camera_device) {
+        free(priv_camera_device);
+        priv_camera_device = NULL;
+    }
+    if(camera_ops) {
+        free(camera_ops);
+        camera_ops = NULL;
+    }
+    *device = NULL;
+    LOGI("%s--- fail rv %d", __FUNCTION__,rv);
+
+    return rv;
 }

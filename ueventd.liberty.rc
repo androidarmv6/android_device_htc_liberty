@@ -5,3 +5,8 @@
 /dev/kgsl-3d0            0666   system    graphics
 /dev/genlock             0666   system    graphics
 /dev/msm_rotator         0660   system    graphics
+/dev/graphics/fb0        0660   media     graphics
+
+#camera
+/dev/msm_camera/*        0660   media     system
+/dev/pmem_camera         0660   system    camera
