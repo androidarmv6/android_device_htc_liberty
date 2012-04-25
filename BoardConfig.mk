@@ -120,7 +120,6 @@ TARGET_PREBUILT_KERNEL := device/htc/liberty/prebuilt/kernel
 TARGET_RECOVERY_INITRC := device/htc/liberty/init.recovery.rc
 BOARD_HAS_NO_SELECT_BUTTON := true
 
-BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/usb_mass_storage/lun0/file
 
 # Fix for Atmel touchscreens; trackball button
@@ -128,6 +127,8 @@ BOARD_USE_LEGACY_TOUCHSCREEN := true
 BOARD_USE_LEGACY_TRACKPAD := true
 
 HTTP := chrome
+WITH_JIT := true
+ENABLE_JSC_JIT := true
 
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DREFRESH_RATE=60
 USE_OPENGL_RENDERER := true
