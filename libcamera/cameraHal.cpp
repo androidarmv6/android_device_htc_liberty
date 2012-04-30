@@ -245,7 +245,7 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
    if (mWindow != NULL) {
       ssize_t  offset;
       size_t   size;
-      int32_t  previewFormat = MDP_Y_CRCB_H2V2;
+      int32_t  previewFormat = MDP_Y_CBCR_H2V2;
       int32_t  destFormat    = MDP_RGBA_8888;
 
       android::status_t retVal;
