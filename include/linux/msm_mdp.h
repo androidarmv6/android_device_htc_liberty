@@ -39,17 +39,23 @@ enum {
  MDP_ARGB_8888,
  MDP_RGB_888,
  MDP_Y_CRCB_H2V2,
+#if 0
  MDP_Y_CBCR_H2V2_ADRENO,
+#endif
  MDP_YCRYCB_H2V1,
  MDP_Y_CRCB_H2V1,
  MDP_Y_CBCR_H2V1,
  MDP_RGBA_8888,
  MDP_BGRA_8888,
  MDP_RGBX_8888,
+#if 0
  MDP_Y_CRCB_H2V2_TILE,
  MDP_Y_CBCR_H2V2_TILE,
+#endif
  MDP_Y_CR_CB_H2V2,
+#if 0
  MDP_Y_CR_CB_GH2V2,
+#endif
  MDP_Y_CB_CR_H2V2,
  MDP_Y_CRCB_H1V1,
  MDP_Y_CBCR_H1V1,
@@ -58,6 +64,15 @@ enum {
  MDP_FB_FORMAT,
  MDP_IMGTYPE_LIMIT2
 };
+
+/* *
+ * Duplicate or unspported formats that need
+ * to be defined for compilation
+ * */
+#define MDP_Y_CBCR_H2V2_ADRENO MDP_Y_CBCR_H2V2
+#define MDP_Y_CBCR_H2V2_TILE   MDP_Y_CBCR_H2V2
+#define MDP_Y_CRCB_H2V2_TILE   MDP_Y_CRCB_H2V2
+#define MDP_Y_CR_CB_GH2V2      MDP_Y_CR_CB_H2V2
 
 enum {
  PMEM_IMG,
