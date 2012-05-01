@@ -84,7 +84,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.media.dec.aud.wma.enabled=1 \
     ro.media.dec.vid.wmv.enabled=1 \
     dalvik.vm.dexopt-flags=m=y \
-    net.bt.name=Liberty \
     ro.config.sync=yes \
     persist.sys.usb.config=mass_storage,adb \
     dalvik.vm.dexopt-data-only=1 \
@@ -140,7 +139,8 @@ PRODUCT_COPY_FILES += \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
-    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
+    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
+    system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf
 
 # Prebuilt Modules
 PRODUCT_COPY_FILES += \
