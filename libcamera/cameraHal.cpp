@@ -189,7 +189,11 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
                          int x, int y, int w, int h)
 {
     struct blitreq blit;
-    int    fb_fd = open("/dev/graphics/fb0", O_RDWR);
+
+    if (srcFd < 0 || destFd < 0)
+       return;
+
+    int fb_fd = open("/dev/graphics/fb0", O_RDWR);
 
     if (fb_fd < 0) {
        LOGD("CameraHAL_CopyBuffers_Hw: Error opening /dev/graphics/fb0\n");
@@ -242,7 +246,7 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
                             preview_stream_ops_t *mWindow,
 			    int32_t previewWidth, int32_t previewHeight)
 {
-   if (mWindow != NULL) {
+   if (mWindow != NULL && dataPtr != NULL) {
       ssize_t  offset;
       size_t   size;
       int32_t  previewFormat = MDP_Y_CBCR_H2V2;
@@ -262,21 +266,23 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
       retVal = mWindow->set_buffers_geometry(mWindow,
                                              previewWidth, previewHeight,
                                              HAL_PIXEL_FORMAT_RGBA_8888);
-      if (retVal == NO_ERROR) {
+      if (retVal == NO_ERROR && mHeap != NULL) {
          int32_t          stride;
          buffer_handle_t *bufHandle = NULL;
 
          LOGV("CameraHAL_HandlePreviewData: dequeueing buffer\n");
          retVal = mWindow->dequeue_buffer(mWindow, &bufHandle, &stride);
-         if (retVal == NO_ERROR) {
+         if (retVal == NO_ERROR && bufHandle != NULL) {
             retVal = mWindow->lock_buffer(mWindow, bufHandle);
             if (retVal == NO_ERROR) {
                private_handle_t const *privHandle =
                   reinterpret_cast<private_handle_t const *>(*bufHandle);
-               CameraHAL_CopyBuffers_Hw(mHeap->getHeapID(), privHandle->fd,
-                                        offset, privHandle->offset,
-                                        previewFormat, destFormat,
-                                        0, 0, previewWidth, previewHeight);
+               if (privHandle != NULL) {
+                  CameraHAL_CopyBuffers_Hw(mHeap->getHeapID(), privHandle->fd,
+                                           offset, privHandle->offset,
+                                           previewFormat, destFormat,
+                                           0, 0, previewWidth, previewHeight);
+               }
                mWindow->enqueue_buffer(mWindow, bufHandle);
                LOGV("CameraHAL_HandlePreviewData: enqueued buffer\n");
             } else {
