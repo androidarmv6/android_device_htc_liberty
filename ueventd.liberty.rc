@@ -8,4 +8,3 @@
 
 #camera
 /dev/msm_camera/*        0660   media     system
-/dev/pmem_camera         0660   system    camera
