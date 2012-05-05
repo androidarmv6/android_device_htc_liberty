@@ -4,6 +4,7 @@
  * Copyright (C) 2012 Zhibin Wu, Simon Davie, Nico Kaiser
  * Copyright (C) 2012 QiSS ME Project Team
  * Copyright (C) 2012 Twisted, Sean Neeley
+ * Copyright (C) 2012 Tobias Droste
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +38,8 @@
 #include <camera/CameraParameters.h>
 #include "CameraHardwareInterface.h"
 #include <binder/IMemory.h>
-#include <ui/OverlayHtc.h>
+
+#include "NoOpOverlay.h"
 
 #define NO_ERROR 0
 //#define LOGV LOGI
@@ -196,7 +198,7 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
     int fb_fd = open("/dev/graphics/fb0", O_RDWR);
 
     if (fb_fd < 0) {
-       LOGD("CameraHAL_CopyBuffers_Hw: Error opening /dev/graphics/fb0\n");
+       LOGE("CameraHAL_CopyBuffers_Hw: Error opening /dev/graphics/fb0\n");
        return;
     }
 
@@ -220,12 +222,7 @@ CameraHAL_CopyBuffers_Hw(int srcFd, int destFd,
 
     blit.req.dst.width     = w;
     blit.req.dst.height    = h;
-#if 0
-    /* TODO Fix destination offset handling. */
-    blit.req.dst.offset    = destOffset;
-#else
     blit.req.dst.offset    = 0;
-#endif
     blit.req.dst.memory_id = destFd;
     blit.req.dst.format    = destFormat;
 
@@ -260,9 +257,6 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
            "offset:%#x size:%#x base:%p\n", previewWidth, previewHeight,
            (unsigned)offset, size, mHeap != NULL ? mHeap->base() : 0);
 
-      mWindow->set_usage(mWindow,
-                         GRALLOC_USAGE_PMEM_PRIVATE_ADSP |
-                         GRALLOC_USAGE_SW_READ_OFTEN);
       retVal = mWindow->set_buffers_geometry(mWindow,
                                              previewWidth, previewHeight,
                                              HAL_PIXEL_FORMAT_RGBA_8888);
@@ -294,173 +288,6 @@ CameraHAL_HandlePreviewData(const android::sp<android::IMemory>& dataPtr,
          }
       }
    }
-}
-
-void
-CameraHAL_FixupParams(android::CameraParameters &settings)
-{
-   const char *preview_sizes =
-      "1280x720,800x480,768x432,720x480,640x480,576x432,480x320,384x288,352x288,320x240,240x160,176x144";
-   const char *video_sizes = 
-      "1280x720,800x480,720x480,640x480,352x288,320x240,176x144";
-   const char *preferred_size       = "640x480";
-   const char *preview_frame_rates  = "30,27,24,15";
-   const char *preferred_frame_rate = "15";
-   const char *frame_rate_range     = "(15,30)";
-
-   settings.set(android::CameraParameters::KEY_VIDEO_FRAME_FORMAT,
-                android::CameraParameters::PIXEL_FORMAT_YUV420SP);
-
-   if (!settings.get(android::CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES)) {
-      settings.set(android::CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES,
-                   preview_sizes);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_SUPPORTED_VIDEO_SIZES)) {
-      settings.set(android::CameraParameters::KEY_SUPPORTED_VIDEO_SIZES,
-                   video_sizes);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_VIDEO_SIZE)) {
-      settings.set(android::CameraParameters::KEY_VIDEO_SIZE, preferred_size);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO)) {
-      settings.set(android::CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO,
-                   preferred_size);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES)) {
-      settings.set(android::CameraParameters::KEY_SUPPORTED_PREVIEW_FRAME_RATES,
-                   preview_frame_rates);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_PREVIEW_FRAME_RATE)) {
-      settings.set(android::CameraParameters::KEY_PREVIEW_FRAME_RATE,
-                   preferred_frame_rate);
-   }
-
-   if (!settings.get(android::CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE)) {
-      LOGD("Setting KEY_PREVIEW_FPS_RANGE: %s\n", frame_rate_range);
-      settings.set(android::CameraParameters::KEY_SUPPORTED_PREVIEW_FPS_RANGE,
-                   frame_rate_range);
-   }
-}
-
-/*******************************************************************
- * overlay hook
- *******************************************************************/
-
-static void wrap_set_fd_hook(void *data, int fd)
-{
-    priv_camera_device_t* dev = NULL;
-    LOGV("%s+++: data %p", __FUNCTION__, data);
-
-    if(!data)
-        return;
-
-    dev = (priv_camera_device_t*) data;
-    LOGV("%s---: fd %i", __FUNCTION__, fd);
-}
-
-static void wrap_set_crop_hook(void *data,
-                               uint32_t x, uint32_t y,
-                               uint32_t w, uint32_t h)
-{
-    priv_camera_device_t* dev = NULL;
-    LOGV("%s+++: %p", __FUNCTION__,data);
-
-    if(!data)
-        return;
-
-    dev = (priv_camera_device_t*) data;
-    LOGV("%s---: %i %i %i %i", __FUNCTION__, x, y, w, h);
-}
-//QiSS ME for preview
-static void wrap_queue_buffer_hook(void *data, void* buffer)
-{
-    sp<IMemoryHeap> heap;
-    priv_camera_device_t* dev = NULL;
-    preview_stream_ops* window = NULL;
-    LOGV("%s+++: %p", __FUNCTION__,data);
-
-    if(!data)
-        return;
-
-    dev = (priv_camera_device_t*) data;
-
-    window = dev->window;
-
-	//QiSS ME fix video preview crash
-    if(window == 0)
-		return;
-
-    heap =  qCamera->getPreviewHeap();
-    if(heap == 0)
-		return;
-
-    int offset = (int)buffer;
-    char *frame = (char *)(heap->base()) + offset;
-
-    LOGV("%s: base:%p offset:%i frame:%p", __FUNCTION__,
-         heap->base(), offset, frame);
-
-    int stride;
-    void *vaddr;
-    buffer_handle_t *buf_handle;
-
-    int width = dev->preview_width;
-    int height = dev->preview_height;
-    if (0 != window->dequeue_buffer(window, &buf_handle, &stride)) {
-        LOGE("%s: could not dequeue gralloc buffer", __FUNCTION__);
-        goto skipframe;
-    }
-    if (0 == dev->gralloc->lock(dev->gralloc, *buf_handle,
-                                GRALLOC_USAGE_SW_WRITE_MASK,
-                                0, 0, width, height, &vaddr)) {
-        // the code below assumes YUV, not RGB
-        memcpy(vaddr, frame, width * height * 3 / 2);
-        LOGV("%s: copy frame to gralloc buffer", __FUNCTION__);
-    } else {
-        LOGE("%s: could not lock gralloc buffer", __FUNCTION__);
-        goto skipframe;
-    }
-
-    dev->gralloc->unlock(dev->gralloc, *buf_handle);
-
-    if (0 != window->enqueue_buffer(window, buf_handle)) {
-        LOGE("%s: could not dequeue gralloc buffer", __FUNCTION__);
-        goto skipframe;
-    }
-
-skipframe:
-
-#ifdef DUMP_PREVIEW_FRAMES
-    static int frameCnt = 0;
-    int written;
-    if (frameCnt >= 100 && frameCnt <= 109 ) {
-        char path[128];
-        snprintf(path, sizeof(path), "/data/%d_preview.yuv", frameCnt);
-        int file_fd = open(path, O_RDWR | O_CREAT, 0666);
-        LOGI("dumping preview frame %d", frameCnt);
-        if (file_fd < 0) {
-            LOGE("cannot open file:%s (error:%i)\n", path, file_fd);
-        }
-        else
-        {
-            LOGV("dumping data");
-            written = write(file_fd, (char *)frame,
-                            dev->preview_frame_size);
-            if(written < 0)
-                LOGE("error in data write");
-        }
-        close(file_fd);
-    }
-    frameCnt++;
-#endif
-    LOGV("%s---: ", __FUNCTION__);
-
-    return;
 }
 
 /*******************************************************************
@@ -566,7 +393,6 @@ static void wrap_data_callback(int32_t msg_type, const sp<IMemory>& dataPtr,
         hwParameters.getPreviewSize(&previewWidth, &previewHeight);
         CameraHAL_HandlePreviewData(dataPtr, dev->window, previewWidth, previewHeight);
 	return;
-
     }
 
     data = wrap_memory_data(dev, dataPtr);
@@ -669,11 +495,6 @@ camera_set_preview_window(struct camera_device * device,
     const char *str_preview_format = params.getPreviewFormat();
     LOGI("%s: preview format %s", __FUNCTION__, str_preview_format);
 
-    //Enable panorama without camera application "hacks"
-    //if (window->set_usage(window, GRALLOC_USAGE_SW_WRITE_MASK)) {
-    //    LOGE("%s---: could not set usage on gralloc buffer", __FUNCTION__);
-    //    return -1;
-    //}
 
     window->set_usage(window, GRALLOC_USAGE_PMEM_PRIVATE_ADSP | GRALLOC_USAGE_SW_READ_OFTEN);
 
@@ -687,10 +508,7 @@ camera_set_preview_window(struct camera_device * device,
     dev->preview_width = preview_width;
     dev->preview_height = preview_height;
 
-    dev->overlay =  new Overlay(wrap_set_fd_hook,
-                                wrap_set_crop_hook,
-                                wrap_queue_buffer_hook,
-                                (void *)dev);
+    dev->overlay = new Overlay();
 
     LOGV("%s---,rv %d", __FUNCTION__,rv);
 
@@ -789,12 +607,7 @@ camera_msg_type_enabled(struct camera_device * device, int32_t msg_type)
 int 
 camera_start_preview(struct camera_device * device)
 {
-    /* TODO: Remove hack. */
-    if (!qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME)) {
-       qCamera->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
-    }
-
-    int rv = -EINVAL;
+    int rv = 0;
     priv_camera_device_t* dev = NULL;
 
     LOGV("%s+++: device %p", __FUNCTION__, device);
@@ -804,7 +617,12 @@ camera_start_preview(struct camera_device * device)
 
     dev = (priv_camera_device_t*) device;
 
+    if (!qCamera->msgTypeEnabled(CAMERA_MSG_PREVIEW_FRAME)) {
+       qCamera->enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
+
     rv = qCamera->startPreview();
+    }
+    
     LOGV("%s--- rv %d", __FUNCTION__,rv);
 
     return rv;
@@ -812,7 +630,7 @@ camera_start_preview(struct camera_device * device)
 
 void 
 camera_stop_preview(struct camera_device * device)
-{
+{    
     priv_camera_device_t* dev = NULL;
 
     LOGV("%s+++: device %p", __FUNCTION__, device);
@@ -823,6 +641,7 @@ camera_stop_preview(struct camera_device * device)
     dev = (priv_camera_device_t*) device;
 
     qCamera->stopPreview();
+    
     LOGV("%s---", __FUNCTION__);
 }
 
@@ -866,13 +685,12 @@ camera_start_recording(struct camera_device * device)
 
     dev = (priv_camera_device_t*) device;
 
-    /* TODO: Remove hack. */
     qCamera->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
 
     rv = qCamera->startRecording();
+    
     LOGV("%s--- rv %d", __FUNCTION__,rv);
 
-    //return rv;
     return NO_ERROR;
 }
 
@@ -888,13 +706,12 @@ camera_stop_recording(struct camera_device * device)
 
     dev = (priv_camera_device_t*) device;
 
-    /* TODO: Remove hack. */
     qCamera->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
-
+    
     qCamera->stopRecording();
 
-    //QiSS ME force start preview when recording stop
     qCamera->startPreview();
+    
     LOGV("%s---", __FUNCTION__);
 }
 
@@ -1058,8 +875,6 @@ camera_get_parameters(struct camera_device * device)
     camParams.dump();
 #endif
 
-    CameraHAL_FixupParams(camParams);
-
     camParams.set("orientation", "landscape");
 
     params_str8 = camParams.flatten();
@@ -1080,7 +895,6 @@ camera_put_parameters(struct camera_device *device, char *params)
     free(params);
     LOGV("%s---", __FUNCTION__);
 }
-
 
 int 
 camera_send_command(struct camera_device * device, int32_t cmd,
