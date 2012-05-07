@@ -180,7 +180,7 @@
         frames) memory.
     -->
 
-    <VideoEditorCap  maxInputFrameWidth="640"
+    <VideoEditorCap maxInputFrameWidth="640"
         maxInputFrameHeight="480" maxOutputFrameWidth="640"
         maxOutputFrameHeight="480" maxPrefetchYUVFrames="10" />
     <!--
