@@ -35,7 +35,7 @@ public:
 
     /* destroys this overlay */
     void destroy();
-    
+
     /* get the HAL handle for this overlay */
     void* getHandleRef() const;
 
@@ -67,7 +67,7 @@ public:
     int32_t getHeightStride() const;
     int32_t getBufferCount() const;
     status_t getStatus() const;
-    
+
 private:
     virtual ~Overlay();
 };
