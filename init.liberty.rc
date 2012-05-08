@@ -125,9 +125,19 @@ service akmd /system/bin/akmd
 
 # Compcache - handle at boot
 service compcache /system/bin/handle_compcache
+    class main
     user root
     group root
-    oneshot
+    disabled
+
+on property:persist.service.zram=10
+    start compcache
+
+on property:persist.service.zram=18
+    start compcache
+
+on property:persist.service.zram=26
+    start compcache
 
 service srv_ser2net /system/bin/ser2net -n
     disabled
