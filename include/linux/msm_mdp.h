@@ -33,34 +33,28 @@ typedef __u32 uint32_t;
 #define MDP_IMGTYPE2_START 0x10000
 
 enum {
- MDP_RGB_565,
- MDP_XRGB_8888,
- MDP_Y_CBCR_H2V2,
- MDP_ARGB_8888,
- MDP_RGB_888,
- MDP_Y_CRCB_H2V2,
-#if 0
- MDP_Y_CBCR_H2V2_ADRENO,
+ MDP_RGB_565,                      // RGB 565 planer
+ MDP_XRGB_8888,                    // RGB 888 padded
+ MDP_Y_CBCR_H2V2,                  // Y and CbCr, pseudo planer w/ Cb is in MSB
+ MDP_ARGB_8888,                    // ARGB 888
+ MDP_RGB_888,                      // RGB 888 planer
+ MDP_Y_CRCB_H2V2,                  // Y and CrCb, pseudo planer w/ Cr is in MSB
+ MDP_YCRYCB_H2V1,                  // YCrYCb interleave
+ MDP_Y_CRCB_H2V1,                  // Y and CrCb, pseduo planer w/ Cr is in MSB
+ MDP_Y_CBCR_H2V1,                  // Y and CrCb, pseduo planer w/ Cr is in MSB
+ MDP_RGBA_8888,                    // ARGB 888
+ MDP_BGRA_8888,                    // ARGB 888
+ MDP_RGBX_8888,                    // RGBX 888
+#if 0 // disabled for marvel in kernel
+ MDP_Y_CRCB_H2V2_TILE,             // Y and CrCb, pseudo planer tile
+ MDP_Y_CBCR_H2V2_TILE,             // Y and CbCr, pseudo planer tile
 #endif
- MDP_YCRYCB_H2V1,
- MDP_Y_CRCB_H2V1,
- MDP_Y_CBCR_H2V1,
- MDP_RGBA_8888,
- MDP_BGRA_8888,
- MDP_RGBX_8888,
-#if 0
- MDP_Y_CRCB_H2V2_TILE,
- MDP_Y_CBCR_H2V2_TILE,
-#endif
- MDP_Y_CR_CB_H2V2,
-#if 0
- MDP_Y_CR_CB_GH2V2,
-#endif
- MDP_Y_CB_CR_H2V2,
- MDP_IMGTYPE_LIMIT,
- MDP_BGR_565 = MDP_IMGTYPE2_START,
- MDP_FB_FORMAT,
- MDP_IMGTYPE_LIMIT2
+ MDP_Y_CR_CB_H2V2,                 // Y, Cr and Cb, planar
+ MDP_Y_CB_CR_H2V2,                 // Y, Cb and Cr, planar
+ MDP_IMGTYPE_LIMIT,                // Non valid image type after this enum
+ MDP_BGR_565 = MDP_IMGTYPE2_START, // BGR 565 planer
+ MDP_FB_FORMAT,                    // framebuffer format
+ MDP_IMGTYPE_LIMIT2                // Non valid image type after this enum
 };
 
 /* *
