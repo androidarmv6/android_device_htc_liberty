@@ -123,6 +123,12 @@ service akmd /system/bin/akmd
     user compass
     group compass misc input
 
+# Compcache - handle at boot
+service compcache /system/bin/handle_compcache
+    user root
+    group root
+    oneshot
+
 service srv_ser2net /system/bin/ser2net -n
     disabled
 
