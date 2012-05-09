@@ -45,7 +45,7 @@ enum {
  MDP_RGBA_8888,                    // ARGB 888
  MDP_BGRA_8888,                    // ARGB 888
  MDP_RGBX_8888,                    // RGBX 888
-#if 0 // disabled for marvel in kernel
+#if 0 // disabled for liberty in kernel
  MDP_Y_CRCB_H2V2_TILE,             // Y and CrCb, pseudo planer tile
  MDP_Y_CBCR_H2V2_TILE,             // Y and CbCr, pseudo planer tile
 #endif
