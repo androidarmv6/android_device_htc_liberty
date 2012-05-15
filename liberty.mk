@@ -133,7 +133,7 @@ PRODUCT_PACKAGES += \
     hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
     e2fsck \
-    camera.liberty
+    camera.msm7x27
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
