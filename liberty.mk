@@ -128,7 +128,6 @@ PRODUCT_PACKAGES += \
     gps.liberty \
     libmm-omxcore \
     libOmxCore \
-    libstagefrighthw \
     hwcomposer.default \
     hwcomposer.msm7x27 \
     com.android.future.usb.accessory \
