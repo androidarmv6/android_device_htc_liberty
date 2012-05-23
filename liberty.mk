@@ -147,6 +147,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
 
+# Copy prebuilt wifi module when it isn't being built with the kernel
 ifneq ($(FULL_KERNEL_BUILD),true)
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko
