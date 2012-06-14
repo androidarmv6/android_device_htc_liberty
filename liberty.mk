@@ -22,7 +22,6 @@ DEVICE_PACKAGE_OVERLAYS := device/htc/liberty/overlay
 # Keylayouts
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/usr/keylayout/liberty-keypad.kl:system/usr/keylayout/liberty-keypad.kl \
-    device/htc/liberty/prebuilt/usr/keychars/liberty-keypad.kcm.bin:system/usr/keychars/liberty-keypad.kcm.bin \
     device/htc/liberty/prebuilt/usr/keylayout/h2w_headset.kl:system/usr/keylayout/h2w_headset.kl \
     device/htc/liberty/prebuilt/usr/keylayout/synaptics-rmi-touchscreen.kl:system/usr/keylayout/synaptics-rmi-touchscreen.kl \
     device/htc/liberty/prebuilt/usr/keylayout/atmel-touchscreen.kl:system/usr/keylayout/atmel-touchscreen.kl
