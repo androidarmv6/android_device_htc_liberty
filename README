@@ -61,12 +61,21 @@ Copyright (C) 2012 LibertyICS
   $ make otapackage -j4
 
 
-* Thanks
+* Credit/Thanks
 
-  Cyanogen
-  attn1
-  jznomoney (who booted the first liberty on Gingerbread and contributes tons to this device)
-  CyanogenMod team
+    Cyanogen
+    CyanogenMod team
+
+  Froyo - Gingerbread:
+    attn1
+    jznomoney
+
+  Ice Cream Sandwich:
+    Droste
+    gladiac
+    munjeni
+    s0be
+    WinSuk
 
 ----
 EOF
