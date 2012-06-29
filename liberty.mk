@@ -34,7 +34,6 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/init.liberty.rc:root/init.liberty.rc \
-    device/htc/liberty/init.liberty.usb.rc:root/init.liberty.usb.rc \
     device/htc/liberty/ueventd.liberty.rc:root/ueventd.liberty.rc
 
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -98,41 +97,15 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.vold.umsdirtyratio=20
 
 PRODUCT_COPY_FILES += \
-    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml \
     frameworks/base/data/etc/android.hardware.camera.autofocus.xml:system/etc/permissions/android.hardware.camera.autofocus.xml \
-    frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-    frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-    frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-    frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
-    frameworks/base/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
-    frameworks/base/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
-    frameworks/base/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
-    frameworks/base/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
-    frameworks/base/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml
-
-# media config xml file
-PRODUCT_COPY_FILES += \
-    device/htc/liberty/media_profiles.xml:system/etc/media_profiles.xml
+    frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml
 
 PRODUCT_PACKAGES += \
-    librs_jni \
-    lights.liberty \
-    gralloc.msm7x27 \
-    copybit.msm7x27 \
-    sensors.liberty \
-    audio.primary.liberty \
-    audio_policy.liberty \
-    audio.a2dp.default \
+    camera.msm7x27 \
     gps.liberty \
-    libmm-omxcore \
-    libOmxCore \
-    libstagefrighthw \
-    hwcomposer.default \
-    hwcomposer.msm7x27 \
-    com.android.future.usb.accessory \
-    e2fsck \
-    camera.msm7x27
+    lights.liberty \
+    sensors.liberty \
+    e2fsck
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -142,32 +115,11 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
     system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf
 
-# Prebuilt Modules
-PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/etc/firmware/bcm4329.hcd:system/etc/firmware/bcm4329.hcd
-
 # Copy prebuilt wifi module when it isn't being built with the kernel
 ifneq ($(FULL_KERNEL_BUILD),true)
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko
 endif
-
-# ICS GPU drivers from Qualcomm
-PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/lib/libC2D2.so:system/lib/libC2D2.so \
-    device/htc/liberty/prebuilt/lib/libgsl.so:system/lib/libgsl.so \
-    device/htc/liberty/prebuilt/lib/libOpenVG.so:system/lib/libOpenVG.so \
-    device/htc/liberty/prebuilt/lib/libsc-a2xx.so:system/lib/libsc-a2xx.so \
-    device/htc/liberty/prebuilt/lib/egl/eglsubAndroid.so:system/lib/egl/eglsubAndroid.so \
-    device/htc/liberty/prebuilt/lib/egl/libEGL_adreno200.so:system/lib/egl/libEGL_adreno200.so \
-    device/htc/liberty/prebuilt/lib/egl/libGLES_android.so:system/lib/egl/libGLES_android.so \
-    device/htc/liberty/prebuilt/lib/egl/libGLESv1_CM_adreno200.so:system/lib/egl/libGLESv1_CM_adreno200.so \
-    device/htc/liberty/prebuilt/lib/egl/libGLESv2_adreno200.so:system/lib/egl/libGLESv2_adreno200.so \
-    device/htc/liberty/prebuilt/lib/egl/libq3dtools_adreno200.so:system/lib/egl/libq3dtools_adreno200.so \
-    device/htc/liberty/prebuilt/etc/firmware/leia_pfp_470.fw:system/etc/firmware/leia_pfp_470.fw \
-    device/htc/liberty/prebuilt/etc/firmware/leia_pm4_470.fw:system/etc/firmware/leia_pm4_470.fw \
-    device/htc/liberty/prebuilt/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw \
-    device/htc/liberty/prebuilt/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw
 
 # media profiles and capabilities spec
 $(call inherit-product, device/htc/liberty/media_a1026.mk)
@@ -178,6 +130,9 @@ PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:syste
 # Prebuilt libraries that are needed to build open-source libraries
 PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
+
+# inherit from common msm7x27
+$(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
 
 $(call inherit-product, build/target/product/full_base_telephony.mk)
 

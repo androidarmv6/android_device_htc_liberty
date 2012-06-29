@@ -24,69 +24,25 @@
 # variant, so that it gets overwritten by the parent (which goes
 # against the traditional rules of inheritance).
 USE_CAMERA_STUB := false
-BOARD_USE_FROYO_LIBCAMERA := true
-JS_ENGINE:=v8
+
+# inherit from common msm7x27
+-include device/htc/msm7x27-common/BoardConfigCommon.mk
 
 # inherit from the proprietary version
 -include vendor/htc/liberty/BoardConfigVendor.mk
-
-TARGET_SPECIFIC_HEADER_PATH := device/htc/liberty/include
-
-TARGET_NO_BOOTLOADER := true
-TARGET_NO_RADIOIMAGE := true
-
-TARGET_BOARD_PLATFORM := msm7x27
-TARGET_ARCH := arm
-TARGET_ARCH_VARIANT := armv6-vfp
-TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
-
-TARGET_CPU_ABI := armeabi-v6l
-TARGET_CPU_ABI2 := armeabi
 
 TARGET_BOOTLOADER_BOARD_NAME := liberty
 
 TARGET_PROVIDES_INIT_TARGET_RC := true
 
-TARGET_LIBAGL_USE_GRALLOC_COPYBITS := true
-
-# Wifi related defines
-BOARD_WPA_SUPPLICANT_DRIVER := WEXT
-WPA_SUPPLICANT_VERSION      := VER_0_8_X
-BOARD_WLAN_DEVICE           := bcm4329
-BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_wext
-WIFI_DRIVER_MODULE_PATH     := "/system/lib/modules/bcm4329.ko"
-WIFI_DRIVER_FW_PATH_STA     := "/system/vendor/firmware/fw_bcm4329.bin"
-WIFI_DRIVER_FW_PATH_AP      := "/system/vendor/firmware/fw_bcm4329_apsta.bin"
-WIFI_DRIVER_MODULE_ARG      := "iface_name=wlan0 firmware_path=/system/vendor/firmware/fw_bcm4329.bin nvram_path=/proc/calibration"
-WIFI_DRIVER_MODULE_NAME     := "bcm4329"
-
-BOARD_USES_GENERIC_AUDIO := false
-
 BOARD_KERNEL_CMDLINE := no_console_suspend=1 console=null
 BOARD_KERNEL_BASE := 0x12c00000
 
-BOARD_HAVE_BLUETOOTH := true
-BOARD_HAVE_BLUETOOTH_BCM := true
-
-BOARD_HAVE_FM_RADIO := true
-BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
-
-BOARD_VENDOR_QCOM_AMSS_VERSION := 4735
-
 BOARD_VENDOR_USE_AKMD := akm8973
-
-BOARD_EGL_CFG := device/htc/liberty/prebuilt/lib/egl/egl.cfg
 
 BOARD_USE_NASTY_PTHREAD_CREATE_HACK := true
 
-BOARD_USE_NEW_LIBRIL_HTC := true
-
-BOARD_NO_RGBX_8888 := true
-
-BOARD_USES_QCOM_GPS := true
 BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
-BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION := 20000
-BOARD_USES_QCOM_LIBRPC := true
 
 # # cat /proc/mtd (liberty)
 # dev:    size   erasesize  name
@@ -98,7 +54,8 @@ BOARD_USES_QCOM_LIBRPC := true
 # mtd5: 0b920000 00020000 "userdata"
 
 # For some reason the kernel is bigger now, and the old size limits are too small
-# It still flashes the bigger image perfectly fine, despite make saying it's too big
+# It still flashes the bigger boot image perfectly fine, despite make saying it's too big
+# (recovery is too big to flash though)
 # Raise the limit (for now) so it will build
 BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00340000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00500000
@@ -109,10 +66,6 @@ BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x0b920000
 
 BOARD_FLASH_BLOCK_SIZE := 131072
 
-TARGET_RELEASETOOLS_EXTENSIONS := device/htc/common
-
-TARGET_KERNEL_SOURCE := kernel/htc/msm7227
-TARGET_KERNEL_CONFIG := cyanogen_msm7227_defconfig
 TARGET_PREBUILT_KERNEL := device/htc/liberty/prebuilt/kernel
 
 #TARGET_PREBUILT_RECOVERY_KERNEL := device/htc/liberty/prebuilt/recovery_kernel
@@ -120,25 +73,9 @@ TARGET_PREBUILT_KERNEL := device/htc/liberty/prebuilt/kernel
 TARGET_RECOVERY_INITRC := device/htc/liberty/init.recovery.rc
 BOARD_HAS_NO_SELECT_BUTTON := true
 
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/usb_mass_storage/lun0/file
-
 # Fix for Atmel touchscreens; trackball button
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 BOARD_USE_LEGACY_TRACKPAD := true
-
-HTTP := chrome
-WITH_JIT := true
-ENABLE_JSC_JIT := true
-
-COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DREFRESH_RATE=60
-USE_OPENGL_RENDERER := true
-BOARD_USES_QCOM_HARDWARE := true
-BOARD_USES_QCOM_LIBS := true
-TARGET_USES_GENLOCK := true
-BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
-
-# Enable WEBGL in WebKit
-ENABLE_WEBGL := true
 
 # Needed for camera
 COMMON_GLOBAL_CFLAGS += -DBINDER_COMPAT

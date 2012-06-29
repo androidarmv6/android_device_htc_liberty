@@ -1,4 +1,4 @@
-import init.liberty.usb.rc
+import init.msm7x27.usb.rc
 
 on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
