@@ -104,8 +104,7 @@ PRODUCT_PACKAGES += \
     camera.msm7x27 \
     gps.liberty \
     lights.liberty \
-    sensors.liberty \
-    e2fsck
+    sensors.liberty
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/vold.fstab:system/etc/vold.fstab \
@@ -113,7 +112,8 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
-    system/bluetooth/data/main.le.conf:system/etc/bluetooth/main.conf
+    system/bluetooth/data/main.conf:system/etc/bluetooth/main.conf \
+    device/htc/liberty/audio_policy.conf:system/etc/audio_policy.conf
 
 # Copy prebuilt wifi module when it isn't being built with the kernel
 ifneq ($(FULL_KERNEL_BUILD),true)
