@@ -43,9 +43,9 @@ extern "C" void destroyAudioPolicyManager(AudioPolicyInterface *interface)
     delete interface;
 }
 
-uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, bool fromCache)
+audio_devices_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, bool fromCache)
 {
-    uint32_t device;
+    uint32_t device = 0;
 
     if (fromCache) {
         ALOGV("getDeviceForStrategy() from cache strategy %d, device %x", strategy, mDeviceForStrategy[strategy]);
@@ -53,6 +53,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
     }
 
     switch (strategy) {
+
     case STRATEGY_DTMF:
         if (!isInCall()) {
             // when off call, DTMF strategy follows the same rules as MEDIA strategy
@@ -135,7 +136,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
     case STRATEGY_MEDIA: {
         uint32_t device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
 #ifdef WITH_A2DP
-        if (mA2dpOutput != 0) {
+        if (getA2dpOutput() != 0) {
             if (strategy == STRATEGY_SONIFICATION && !a2dpUsedForSonification()) {
                 break;
             }
@@ -182,7 +183,7 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
     }
 
     ALOGV("getDeviceForStrategy() strategy %d, device %x", strategy, device);
-    return device;
+    return (audio_devices_t)device;
 }
 
 status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_handle_t output, uint32_t device, int delayMs, bool force)
@@ -202,7 +203,7 @@ status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_h
         return INVALID_OPERATION;
     }
 
-    float volume = computeVolume(stream, index, output, device);
+    float volume = computeVolume(stream, index, output, (audio_devices_t)device);
     // We actually change the volume if:
     // - the float value returned by computeVolume() changed
     // - the force flag is set
@@ -229,7 +230,7 @@ status_t AudioPolicyManager::checkAndSetVolume(int stream, int index, audio_io_h
         } else {
             voiceVolume = 1.0;
         }
-        if (voiceVolume >= 0 && output == mHardwareOutput) {
+        if (voiceVolume >= 0 && output == mPrimaryOutput) {
             mpClientInterface->setVoiceVolume(voiceVolume, delayMs);
             mLastVoiceVolume = voiceVolume;
         }
