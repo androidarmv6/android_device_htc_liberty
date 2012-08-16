@@ -51,13 +51,10 @@ BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
 # mtd4: 02800000 00020000 "cache"
 # mtd5: 0b920000 00020000 "userdata"
 
-# For some reason the kernel is bigger now, and the old size limits are too small
-# It still flashes the bigger boot image perfectly fine, despite make saying it's too big
-# (recovery is too big to flash though)
-# Raise the limit (for now) so it will build
-BOARD_BOOTIMAGE_PARTITION_SIZE := 0x00340000
+BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002c0000
+# Built recovery image is too big
+# Raise the limit (for now) so a brunch will complete
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00500000
-#BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002c0000
 #BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00420000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 0x0f000000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x0b920000
