@@ -15,7 +15,7 @@
 #
 
 
-DEVICE_PACKAGE_OVERLAYS := device/htc/liberty/overlay
+DEVICE_PACKAGE_OVERLAYS += device/htc/liberty/overlay
 
 # Keylayouts
 PRODUCT_COPY_FILES += \
