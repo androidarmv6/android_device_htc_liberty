@@ -5,8 +5,8 @@
 
 onoff="0"
 
-catfile=`grep device.internal /system/usr/idc/curcial-oj.idc`
-if [ "$catfile" = "device.internal = 0" ]
+checkfile=`grep device.internal /system/usr/idc/curcial-oj.idc`
+if [ "$checkfile" = "device.internal = 0" ]
 then
 # Trackball wake is already enabled, disable it
 onoff="1"
