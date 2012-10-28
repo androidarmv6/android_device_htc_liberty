@@ -37,7 +37,7 @@ PRODUCT_COPY_FILES += \
 # Default network type.
 # 0 => WCDMA preferred.
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.telephony.default_network=0
+    ro.telephony.default_network=0 \
     ro.telephony.ril.v3=signalstrength
 
 # This is a 512MB device, so 32mb heapsize
