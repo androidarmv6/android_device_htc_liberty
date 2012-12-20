@@ -68,3 +68,5 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 # Fix for Atmel touchscreens; trackball button
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 BOARD_USE_LEGACY_TRACKPAD := true
+
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/htc/liberty/bluetooth
