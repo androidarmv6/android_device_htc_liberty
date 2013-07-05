@@ -66,14 +66,6 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
     system/bluetooth/data/main.conf:system/etc/bluetooth/main.conf
 
-# All system live wallpapers don't currently work, so leaving them out to save space
-# Extra live wallpapers
-#PRODUCT_PACKAGES += \
-#    HoloSpiralWallpaper \
-#    NoiseField \
-#    Galaxy4 \
-#    PhaseBeam
-
 # Copy prebuilt wifi module when it isn't being built with the kernel
 ifeq ($(FULL_KERNEL_BUILD),false)
 PRODUCT_COPY_FILES += \
