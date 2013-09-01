@@ -81,6 +81,6 @@ $(call inherit-product, device/common/gps/gps_us_supl.mk)
 # inherit from common msm7x27
 $(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
 
-PRODUCT_NAME := generic_liberty
+PRODUCT_NAME := full_liberty
 PRODUCT_MANUFACTURER := HTC
 PRODUCT_DEVICE := liberty
