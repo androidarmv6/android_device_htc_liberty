@@ -51,7 +51,8 @@ BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE := liberty
 # mtd4: 02800000 00020000 "cache"
 # mtd5: 0b920000 00020000 "userdata"
 
-BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002c0000
+# Original 0x002c0000 size is too small & bigger sizes can be flashed anyway
+BOARD_BOOTIMAGE_PARTITION_SIZE := 0x002d0000
 # Built recovery image is too big
 # Raise the limit (for now) so a brunch will complete
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x00500000
