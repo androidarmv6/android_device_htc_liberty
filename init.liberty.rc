@@ -47,17 +47,6 @@ on init
     mkdir /data/app-cache 0771 system system
     mount rootfs rootfs / ro remount
 
-    # Define the memory thresholds at which the above process classes will
-    # be killed.  These numbers are in pages (4k).
-    setprop ro.FOREGROUND_APP_MEM 3584
-    setprop ro.VISIBLE_APP_MEM 4096
-    setprop ro.SECONDARY_SERVER_MEM 6144
-    setprop ro.BACKUP_APP_MEM 6144
-    setprop ro.HOME_APP_MEM 6144
-    setprop ro.HIDDEN_APP_MEM 7168
-    setprop ro.CONTENT_PROVIDER_MEM 7680
-    setprop ro.EMPTY_APP_MEM 8192
-
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
@@ -74,15 +63,8 @@ on init
     mkdir /data/data/shared
     chmod 0777 /data/data/shared
 
-    # Overwrite framework low memory killer minfree setting
-    write /sys/module/lowmemorykiller/parameters/minfree 3584,4096,6144,7168,7680,8192
-
     # zRAM
     write /proc/sys/vm/page-cluster 0
-
-    # Enable low memory killer to check file pages
-    write /sys/module/lowmemorykiller/parameters/minfile 0,0,0,5120,5632,6144
-    write /sys/module/lowmemorykiller/parameters/check_filepages 1
 
     # performance tweaks for flash
     write /sys/block/mtdblock3/bdi/read_ahead_kb 4
