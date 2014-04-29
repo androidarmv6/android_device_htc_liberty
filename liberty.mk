@@ -38,10 +38,8 @@ PRODUCT_COPY_FILES += \
 # 0 => WCDMA preferred.
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.default_network=0 \
-    ro.telephony.ril.v3=signalstrength
-
-# Dalvik heap config for devices with 512MB memory
-$(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
+    ro.telephony.ril.v3=signalstrength \
+    ro.ril.disable.fd.plmn.prefix=23402,23410,23411
 
 ## Get non-open-source GSM-specific aspects if available
 $(call inherit-product-if-exists, vendor/htc/liberty/liberty-vendor.mk)
@@ -59,12 +57,11 @@ PRODUCT_PACKAGES += \
     sensors.liberty
 
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/vold.fstab:system/etc/vold.fstab \
+    device/htc/liberty/fstab.liberty:root/fstab.liberty \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
-    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
-    system/bluetooth/data/main.conf:system/etc/bluetooth/main.conf
+    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
 
 # Copy prebuilt wifi module when it isn't being built with the kernel
 ifeq ($(FULL_KERNEL_BUILD),false)
