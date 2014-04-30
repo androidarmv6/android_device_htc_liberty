@@ -97,7 +97,9 @@ on init
     write /sys/block/mtdblock5/bdi/read_ahead_kb 4
 
 service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
-    -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf
+    -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf \
+    -e/data/misc/wifi/entropy.bin \
+    -O/data/misc/wifi/sockets -g@android:wpa_wlan0
     # we will start as root and wpa_supplicant will switch to user wifi
     # after setting up the capabilities required for WEXT
     # user wifi
