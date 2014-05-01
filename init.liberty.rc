@@ -26,7 +26,7 @@ on boot
     chown system system /sys/class/leds/lcd-backlight/brightness
     chown system system /sys/class/leds/lcd-backlight/auto
 
-on early-init
+on init
     #sdcard
     mkdir /mnt/media_rw/sdcard0 0700 media_rw media_rw
     mkdir /storage/sdcard0 0700 root root
@@ -41,13 +41,6 @@ on early-init
     mkdir /sd-ext 0771 system system
     export SD_EXT_DIRECTORY /sd-ext
 
-on fs
-    # mount partitions
-    mount_all /fstab.liberty
-    # zRAM
-    swapon_all /fstab.liberty
-
-on init
     mount rootfs rootfs / remount
     mkdir /app-cache 01777 system system
     mount tmpfs tmpfs /app-cache size=8m
@@ -95,6 +88,12 @@ on init
     write /sys/block/mtdblock3/bdi/read_ahead_kb 4
     write /sys/block/mtdblock4/bdi/read_ahead_kb 4
     write /sys/block/mtdblock5/bdi/read_ahead_kb 4
+
+on fs
+    # mount partitions
+    mount_all /fstab.liberty
+    # zRAM
+    swapon_all /fstab.liberty
 
 service wpa_supplicant /system/bin/logwrapper /system/bin/wpa_supplicant \
     -Dwext -iwlan0 -c/data/misc/wifi/wpa_supplicant.conf \
@@ -167,6 +166,3 @@ on property:service.ser2net.enable=0
 service fuse_sdcard0 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/sdcard0 /storage/sdcard0
     class late_start
     disabled
-
-on property:ro.fuse_sdcard=true
-   start fuse_sdcard0
