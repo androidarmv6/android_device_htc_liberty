@@ -10,6 +10,9 @@ $(call inherit-product, vendor/cm/config/common_mini_phone.mk)
 # Inherit device configuration
 $(call inherit-product, device/htc/liberty/liberty.mk)
 
+# Bootanimation optimization
+TARGET_BOOTANIMATION_HALF_RES := true
+
 ## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := liberty
 PRODUCT_NAME := cm_liberty
