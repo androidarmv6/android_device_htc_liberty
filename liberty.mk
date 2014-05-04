@@ -43,7 +43,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 ## Get non-open-source GSM-specific aspects if available
 $(call inherit-product-if-exists, vendor/htc/liberty/liberty-vendor.mk)
-$(call inherit-product-if-exists, vendor/htc/msm7x27-common/vendor.mk)
 
 # Override /proc/sys/vm/dirty_ratio on UMS
 PRODUCT_PROPERTY_OVERRIDES += \
