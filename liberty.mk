@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+$(call inherit-product, build/target/product/full_base_telephony.mk)
 
 DEVICE_PACKAGE_OVERLAYS += device/htc/liberty/overlay
 
@@ -81,8 +82,6 @@ PRODUCT_COPY_FILES += \
 
 # inherit from common msm7x27
 $(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
-
-$(call inherit-product, build/target/product/full_base_telephony.mk)
 
 PRODUCT_NAME := generic_liberty
 PRODUCT_MANUFACTURER := HTC
