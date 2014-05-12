@@ -61,7 +61,6 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/fstab.liberty:root/fstab.liberty \
     device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
-    device/htc/liberty/prebuilt/etc/init.d/05mountsd:system/etc/init.d/05mountsd \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
 
 # Copy prebuilt wifi module when it isn't being built with the kernel
