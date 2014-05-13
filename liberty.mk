@@ -69,9 +69,6 @@ PRODUCT_COPY_FILES += \
     device/htc/liberty/prebuilt/lib/modules/bcm4329.ko:system/lib/modules/bcm4329.ko
 endif
 
-# media profiles and capabilities spec
-$(call inherit-product, device/htc/liberty/media_a1026.mk)
-
 # Sets copy files for all HTC-specific device
 PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:system/etc/ecclist_for_mcc.conf
 
