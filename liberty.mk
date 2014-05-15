@@ -27,7 +27,7 @@ PRODUCT_COPY_FILES += \
 
 # Input device calibration files
 PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/usr/idc/synaptics-rmi-touchscreen_slim.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
+    device/htc/liberty/prebuilt/usr/idc/synaptics-rmi-touchscreen.idc:system/usr/idc/synaptics-rmi-touchscreen.idc \
     device/htc/liberty/prebuilt/usr/idc/atmel-touchscreen.idc:system/usr/idc/atmel-touchscreen.idc \
     device/htc/liberty/prebuilt/usr/idc/curcial-oj.idc:system/usr/idc/curcial-oj.idc
 
