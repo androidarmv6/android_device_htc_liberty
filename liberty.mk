@@ -73,8 +73,8 @@ endif
 PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:system/etc/ecclist_for_mcc.conf
 
 # Prebuilt libraries that are needed to build open-source libraries
-PRODUCT_COPY_FILES += \
-    device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
+#PRODUCT_COPY_FILES += \
+#    device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
 
 # inherit from common msm7x27
 $(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
