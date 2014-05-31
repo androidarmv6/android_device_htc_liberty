@@ -76,7 +76,7 @@ PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:syste
 #    device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
 
 # gps.conf
-$(call inherit-product, device/common/gps/gps_us.mk)
+$(call inherit-product, device/common/gps/gps_us_supl.mk)
 
 # inherit from common msm7x27
 $(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
