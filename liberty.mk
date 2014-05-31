@@ -59,7 +59,6 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/fstab.liberty:root/fstab.liberty \
-    device/common/gps/gps.conf_US:system/etc/gps.conf \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
     device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
 
@@ -75,6 +74,9 @@ PRODUCT_COPY_FILES += device/htc/liberty/prebuilt/etc/ecclist_for_mcc.conf:syste
 # Prebuilt libraries that are needed to build open-source libraries
 #PRODUCT_COPY_FILES += \
 #    device/htc/liberty/prebuilt/lib/libcamera.so:obj/lib/libcamera.so
+
+# gps.conf
+$(call inherit-product, device/common/gps/gps_us.mk)
 
 # inherit from common msm7x27
 $(call inherit-product, device/htc/msm7x27-common/msm7x27.mk)
