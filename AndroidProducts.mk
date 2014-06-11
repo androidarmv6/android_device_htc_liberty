@@ -18,4 +18,5 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/liberty.mk
+    $(LOCAL_DIR)/liberty.mk \
+    $(LOCAL_DIR)/full_liberty.mk
