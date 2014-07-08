@@ -31,7 +31,7 @@ USE_CAMERA_STUB := false
 # inherit from the proprietary version
 -include vendor/htc/liberty/BoardConfigVendor.mk
 
-TARGET_KERNEL_CONFIG := cyanogen_msm7227_defconfig
+TARGET_KERNEL_CONFIG := htc_msm7227_defconfig
 
 TARGET_BOOTLOADER_BOARD_NAME := liberty
 
