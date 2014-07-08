@@ -1,4 +1,4 @@
-# Copyright (C) 2009 The Android Open Source Project
+# Copyright (C) 2014 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ USE_CAMERA_STUB := false
 # inherit from the proprietary version
 -include vendor/htc/liberty/BoardConfigVendor.mk
 
-TARGET_KERNEL_CONFIG := cyanogen_msm7227_defconfig
+TARGET_KERNEL_CONFIG := htc_msm7227_defconfig
 
 TARGET_BOOTLOADER_BOARD_NAME := liberty
 
@@ -63,8 +63,6 @@ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 0x0f000000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x0b920000
 
 BOARD_FLASH_BLOCK_SIZE := 131072
-
-TARGET_PREBUILT_KERNEL := device/htc/liberty/prebuilt/kernel
 
 # Fix for Atmel touchscreens; trackball button
 BOARD_USE_LEGACY_TOUCHSCREEN := true
