@@ -55,7 +55,7 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += \
     gps.liberty \
-    sensors.liberty
+    sensors.msm7x27
 
 PRODUCT_COPY_FILES += \
     device/htc/liberty/fstab.liberty:root/fstab.liberty \
