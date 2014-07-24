@@ -5,7 +5,7 @@ $(call inherit-product, vendor/cm/config/gsm.mk)
 PRODUCT_RELEASE_NAME := Liberty
 
 # Inherit some common CM stuff.
-$(call inherit-product, vendor/cm/config/common_mini_phone.mk)
+$(call inherit-product, vendor/cm/config/mini.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/htc/liberty/liberty.mk)
