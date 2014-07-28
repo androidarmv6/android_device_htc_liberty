@@ -31,7 +31,11 @@ USE_CAMERA_STUB := false
 # inherit from the proprietary version
 -include vendor/htc/liberty/BoardConfigVendor.mk
 
+ifneq (eng,$(TARGET_BUILD_VARIANT))
 TARGET_KERNEL_CONFIG := htc_msm7227_defconfig
+else
+TARGET_KERNEL_CONFIG := htc_msm7227_recovery_defconfig
+endif
 
 TARGET_BOOTLOADER_BOARD_NAME := liberty
 
