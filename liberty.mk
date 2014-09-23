@@ -60,7 +60,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     device/htc/liberty/fstab.liberty:root/fstab.liberty \
     vendor/cm/prebuilt/common/etc/apns-conf.xml:system/etc/apns-conf.xml \
-    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so
+    device/htc/liberty/prebuilt/lib/libcamera.so:system/lib/libcamera.so \
+    device/htc/liberty/twrp.fstab:recovery/root/etc/twrp.fstab
 
 # Copy prebuilt wifi module when it isn't being built with the kernel
 ifeq ($(FULL_KERNEL_BUILD),false)
